@@ -5,25 +5,20 @@ using UnityEngine;
 
 public class GameHandler : MonoBehaviour
 {
-    public GameObject basicUnit;
-    public GameObject FallingBall;
+    public static GameHandler instance { get; private set; }
+    public GameObject Hub;
     private GameObject spearPrefab;
     // Start is called before the first frame update
     void Start()
     {
-        if (basicUnit.TryGetComponent(out Animator unitsAnimator))
-        {
-            //unitsAnimator.enabled = false;
-        }
+        if (instance != null && instance != this)
+            Destroy(this);
+        else
+            instance = this;
         spearPrefab = Resources.Load("Prefabs/Spear") as GameObject;
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            FallingBall.transform.position = new Vector3(-0.8941255f, 7f, -1.810738f);
-            FallingBall.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        }
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -38,6 +33,7 @@ public class GameHandler : MonoBehaviour
                 Vector3 spearSpawnPosition = Camera.main.transform.position + (-2 * Camera.main.transform.forward);
                 Quaternion spearRotation = Quaternion.FromToRotation(Vector3.forward, destinationPoint - spearSpawnPosition);
                 GameObject spear = Instantiate(spearPrefab, spearSpawnPosition, spearRotation);
+                spear.GetComponent<SpearController>().damage = 1f;
                 //spear.GetComponentInChildren<Rigidbody>().AddForce(30 * spear.transform.forward, ForceMode.VelocityChange);
                 Rigidbody[] spearRbs = spear.GetComponentsInChildren<Rigidbody>();
                 foreach (Rigidbody rb in spearRbs)

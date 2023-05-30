@@ -71,8 +71,8 @@ public class CameraMovement : MonoBehaviour
             float dx = heightScalar * (p2 - p1).x * panSpeed;
             float dz = heightScalar * (p2 - p1).y * panSpeed; // No idea why we need y axis
 
-            Vector3 move = new Vector3(-dx, 0, 0);
-            move += new Vector3(0, 0, -dz);
+            Vector3 move = new Vector3(dx, 0, 0);
+            move += new Vector3(0, 0, dz);
 
             transform.position += move;
 

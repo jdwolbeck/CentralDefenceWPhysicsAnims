@@ -1,0 +1,167 @@
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.AI;
+
+public enum UnitType
+{
+    None,
+    Defender,
+    Attacker
+}
+public class UnitController : MonoBehaviour
+{
+    public GameObject Hips;
+    public float totalMass;
+    public UnitType unitType;
+    public float sightRange;
+    public float attackRange;
+    public float damage;
+    public float attackSpeed;
+    private Rigidbody[] rigidBodies;
+    private Animator animator;
+    private NavMeshAgent navAgent;
+    private GameObject currentTarget;
+    private float timeSinceLastAttack;
+    private float timeSinceSpear;
+    private float standUpCooldown;
+    private bool recentlyHitBySpear;
+    private bool animatorPresent;
+    private bool inCombat;
+    private void Start()
+    {
+        rigidBodies = GetComponentsInChildren<Rigidbody>();
+        foreach (var rigidBody in rigidBodies)
+        {
+            rigidBody.isKinematic = true;
+            totalMass += rigidBody.mass;
+        }
+        navAgent = GetComponent<NavMeshAgent>();
+        standUpCooldown = 2f;
+        recentlyHitBySpear = false;
+        animator = GetComponent<Animator>();
+        if (unitType == UnitType.None)
+        {
+            Debug.Log("UnitType is not set for GO: " + gameObject.ToString());
+        }
+        animatorPresent = animator != null;
+        inCombat = false;
+    }
+    private void Update()
+    {
+        if (animatorPresent)
+        {
+            float speedPercent = navAgent.velocity.magnitude / navAgent.speed;
+            animator.SetFloat("SpeedPercent", speedPercent, .1f, Time.deltaTime); // BlendTree Variable, local speed%, transition time between animations, deltaTime
+            animator.SetBool("InCombat", inCombat);
+        }
+        if (recentlyHitBySpear)
+        { // Commence stand up sequence.
+            if ((timeSinceSpear + standUpCooldown) <= Time.time)
+            {
+                transform.position = new Vector3(Hips.transform.position.x, transform.position.y, Hips.transform.position.z);
+                recentlyHitBySpear = false;
+                foreach (Rigidbody rb in rigidBodies)
+                {
+                    rb.isKinematic = true;
+                }
+                animator.enabled = true;
+            }
+            else
+            {
+            }
+        }
+        else
+        {
+            if (unitType == UnitType.Attacker)
+            {
+                HandleAttackAI();
+            }
+            if (unitType == UnitType.Defender)
+            {
+                HandleDefendAI();
+            }
+        }
+    }
+    public void HitBySpear(GameObject incomingSpear, Vector3 incomingVelocity, GameObject bodyPartHit)
+    {
+        animator.enabled = false;
+        foreach(Rigidbody rb in rigidBodies)
+        {
+            rb.isKinematic = false;
+        }
+        float massRatio = incomingSpear.GetComponent<SpearController>().totalMass / totalMass;
+        //Debug.Log("Total mass of unit: " + totalMass + " total mass of Spear: " + incomingSpear.GetComponent<SpearController>().totalMass + " final ratio: " + massRatio);
+        bodyPartHit.GetComponent<Rigidbody>().AddForce(5 * massRatio * incomingVelocity, ForceMode.Impulse);
+        timeSinceSpear = Time.time;
+        recentlyHitBySpear = true;
+    }
+    public void HandleAttackAI()
+    {
+        bool reachedTarget = false;
+        bool tempInCombat = false;
+        if (currentTarget == null)
+        {
+            currentTarget = GameHandler.instance.Hub;
+            if (currentTarget != null && currentTarget.TryGetComponent(out HealthController healthController))
+            {
+                healthController.onDeath += ClearTarget;
+                navAgent.SetDestination(currentTarget.transform.position);
+            }
+        }
+        else
+        {
+            if (navAgent.remainingDistance < attackRange && navAgent.remainingDistance > 0.1f && navAgent.speed > 0.1f)
+            {
+                navAgent.SetDestination(transform.position);
+                reachedTarget = true;
+            }
+            if (Vector3.Distance(transform.position, currentTarget.transform.position) < attackRange)
+            {
+                tempInCombat = true;
+                if (currentTarget == null)
+                    Debug.Log("Current target null for some reason on " + gameObject.ToString());
+                Attack(currentTarget);
+            }
+            else if (reachedTarget)
+            {
+                Debug.Log("ISSUE: We stopped moving because we reached the target but the distance to the target is not < attackRange. Trying to reassign target destination.");
+                navAgent.SetDestination(currentTarget.transform.position);
+            }
+        }
+        inCombat = tempInCombat;
+    }
+    public void Attack(GameObject target)
+    {
+        float attackCooldown = 1 / attackSpeed;
+        if (target == null)
+        {
+            Debug.Log(gameObject.ToString() + " just tried to attack a null target.");
+            return;
+        }
+        if (target.TryGetComponent(out HealthController healthController))
+        {
+            if (Time.time > timeSinceLastAttack + attackCooldown)
+            {
+                healthController.TakeDamage(gameObject, damage);
+                timeSinceLastAttack = Time.time;
+            }
+        }
+        else
+        {
+            Debug.Log("ISSUE: Tried to attack something without a healthController: " + target.ToString());
+        }
+
+    }
+    public void ClearTarget()
+    {
+        Debug.Log("Current target died, removing");
+        currentTarget = null;
+        inCombat = false;
+    }
+    public void HandleDefendAI()
+    {
+
+    }
+}

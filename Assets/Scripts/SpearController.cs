@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using static UnityEditor.Progress;
 
 public class SpearController : MonoBehaviour
 {
     public float totalMass;
+    public float damage;
     private float timeSinceInstantiation;
+    private bool hasDoneDamage;
     void Start()
     {
         timeSinceInstantiation = 0f;
@@ -14,6 +17,7 @@ public class SpearController : MonoBehaviour
         {
             totalMass += rb.mass;
         }
+        hasDoneDamage = false;
     }
     void Update()
     {
@@ -32,27 +36,39 @@ public class SpearController : MonoBehaviour
             Debug.Log("We received a null collision!");
             return;
         }
-        Debug.Log("Collided with object: " + collision.gameObject.ToString());
-        
+        Debug.Log("Collided with object " + collision.gameObject.ToString());
         // Get the parent game object of whatever we hit
         GameObject parentGO = collision.gameObject;
-        while (parentGO.transform.parent != null) 
+        bool isUnit = false;
+        if (parentGO.TryGetComponent(out UnitController tmp2))
+        {
+            //Debug.Log("Found unit controller on unit we hit with spear.");
+            isUnit = true;
+        }
+        while (parentGO.transform.parent != null && !isUnit)
         {
             parentGO = parentGO.transform.parent.gameObject;
+            if (parentGO.TryGetComponent(out UnitController tmp))
+            {
+                //Debug.Log("Found unit controller on unit we hit with spear.");
+                isUnit = true;
+            }
         }
-        bool isUnit = parentGO.TryGetComponent<UnitController>(out UnitController temp);
+
+        Debug.Log("Parent object " + parentGO.ToString() + " isUnit? " + isUnit);
         if (isUnit)
-        {
-            Debug.Log("IsUnit was true.");
+        { 
             RemoveRigidBodies();
             // Set this spear to be a child of the unit it hit
-            //transform.SetPositionAndRotation(spearPosBeforeColl, spearRotBeforeColl);
-            //transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
             transform.parent = collision.transform;
-            //transform.SetParent(collision.transform, true);//parentGO.transform, false);
             if (parentGO.TryGetComponent(out UnitController unitController))
             {
                 unitController.HitBySpear(gameObject, velocityBeforeCollision, collision.gameObject);
+                if (!hasDoneDamage)
+                {
+                    parentGO.GetComponent<HealthController>().TakeDamage(gameObject, damage);
+                    hasDoneDamage = true;
+                }
             }
         }
         else
@@ -67,7 +83,7 @@ public class SpearController : MonoBehaviour
             }
             else
             {
-                Debug.Log("Spear did not stick with an angle of " + angleOfCollision);
+                //Debug.Log("Spear did not stick with an angle of " + angleOfCollision);
             }
         }
     }
