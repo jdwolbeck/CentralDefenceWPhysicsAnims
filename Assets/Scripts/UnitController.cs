@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Animations;
 
 public enum UnitType
 {
@@ -29,6 +30,7 @@ public class UnitController : MonoBehaviour
     private bool recentlyHitBySpear;
     private bool animatorPresent;
     private bool inCombat;
+    private bool debug = false;
     private void Start()
     {
         rigidBodies = GetComponentsInChildren<Rigidbody>();
@@ -99,7 +101,6 @@ public class UnitController : MonoBehaviour
     }
     public void HandleAttackAI()
     {
-        bool reachedTarget = false;
         bool tempInCombat = false;
         if (currentTarget == null)
         {
@@ -112,25 +113,40 @@ public class UnitController : MonoBehaviour
         }
         else
         {
-            if (navAgent.remainingDistance < attackRange && navAgent.remainingDistance > 0.1f && navAgent.speed > 0.1f)
-            {
-                navAgent.SetDestination(transform.position);
-                reachedTarget = true;
-            }
-            if (Vector3.Distance(transform.position, currentTarget.transform.position) < attackRange)
-            {
-                tempInCombat = true;
-                if (currentTarget == null)
-                    Debug.Log("Current target null for some reason on " + gameObject.ToString());
-                Attack(currentTarget);
-            }
-            else if (reachedTarget)
-            {
-                Debug.Log("ISSUE: We stopped moving because we reached the target but the distance to the target is not < attackRange. Trying to reassign target destination.");
-                navAgent.SetDestination(currentTarget.transform.position);
-            }
+            tempInCombat = MoveToAttackTarget(currentTarget);
         }
         inCombat = tempInCombat;
+    }
+    public bool MoveToAttackTarget(GameObject target)
+    {
+        bool inRangeOfTarget = false;
+        bool reachedTarget = false;
+        if (target == null)
+            return false;
+        if (currentTarget != target)
+            currentTarget = target;
+        if (navAgent.remainingDistance < attackRange && navAgent.remainingDistance > 0.1f && navAgent.speed > 0.1f)
+        {
+            navAgent.SetDestination(transform.position);
+            reachedTarget = true;
+        }
+        if (Vector3.Distance(transform.position, currentTarget.transform.position) < attackRange)
+        {
+            inRangeOfTarget = true;
+            if (currentTarget == null)
+                Debug.Log("Current target null for some reason on " + gameObject.ToString());
+            Attack(currentTarget);
+        }
+        else if (reachedTarget)
+        {
+            Debug.Log("ISSUE: We stopped moving because we reached the target but the distance to the target is not < attackRange. Trying to reassign target destination.");
+            navAgent.SetDestination(currentTarget.transform.position);
+        }
+        else
+        {
+            navAgent.SetDestination(currentTarget.transform.position);
+        }
+        return inRangeOfTarget;
     }
     public void Attack(GameObject target)
     {
@@ -161,6 +177,82 @@ public class UnitController : MonoBehaviour
         inCombat = false;
     }
     public void HandleDefendAI()
+    {
+        if (currentTarget != null)
+        {
+            MoveToAttackTarget(currentTarget);
+        }
+        if (currentTarget == null)
+        {
+            if (!LookForTarget())
+                PatrolCrystal();
+        }
+    }
+    public bool LookForTarget()
+    {
+        List<GameObject> foundUnits = new List<GameObject>();
+        // Utilize physics to create a sphere to check for all colliders within a sight radius
+        Collider[] colliders = Physics.OverlapSphere(transform.position, sightRange);
+        foreach (Collider collider in colliders)
+        {
+            // Check for a UnitController script on a given gameObject and their parents.
+            //Debug.Log("Collider found: " + collider.gameObject.ToString());
+            GameObject parentGO = collider.gameObject;
+            bool topLevelGO = false;
+            // Do an initial check if current GO is toplevel of Attacker/Defender unit.
+            UnitController uc;
+            if (parentGO.TryGetComponent(out uc))
+            {
+                if (uc.unitType == UnitType.Attacker)
+                    topLevelGO = true;
+            }
+            // Keep checking for UnitController script until we find one or we are at the top level of the heirarchy. 
+            while (parentGO.transform.parent != null && !topLevelGO)
+            {
+                parentGO = parentGO.transform.parent.gameObject;
+                if (parentGO.TryGetComponent(out uc))
+                {
+                    if (uc.unitType == UnitType.Attacker)
+                        topLevelGO = true;
+                }
+            }
+            // We found a UnitController attached to a gameObject.
+            if (topLevelGO)
+            {
+                // Add each unique Attacker/Defender into a list
+                bool unitAccountedFor = false;
+                foreach (GameObject go in foundUnits)
+                {
+                    if (parentGO == go)
+                        unitAccountedFor = true;
+                }
+                if (!unitAccountedFor)
+                {
+                    //Debug.Log("Collider " + collider.gameObject.ToString() + " is this GameObject (" + parentGO.ToString() + ") Adding to our foundUnits list.");
+                    foundUnits.Add(parentGO);
+                }
+            }
+        }
+        int index = 0;
+        int indexOfClosestEnemy = -1;
+        if (foundUnits.Count > 0)
+        {
+            float closestEnemy = 999999f;
+            if (Vector3.Distance(transform.position, foundUnits[index].transform.position) < closestEnemy)
+            {
+                closestEnemy = Vector3.Distance(transform.position, foundUnits[index].transform.position);
+                indexOfClosestEnemy = index;
+            }
+            index++;
+        }
+        if (indexOfClosestEnemy != -1)
+        {
+            currentTarget = foundUnits[indexOfClosestEnemy];
+            return true;
+        }
+        return false;
+    }
+    public void PatrolCrystal()
     {
 
     }

@@ -96,7 +96,7 @@ MonoBehaviour:
   totalMass: 0
   unitType: 1
   sightRange: 15
-  attackRange: 10
+  attackRange: 1
   damage: 1
   attackSpeed: 1
 --- !u!114 &8426747879658642880
@@ -1660,7 +1660,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -876546973899608171, guid: 1f0110d5736028148905cc3a5de307e7, type: 3}
+  - {fileID: 2100000, guid: d6740f56f79969b4593a0898b36d9edf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
