@@ -36,7 +36,7 @@ public class SpearController : MonoBehaviour
             Debug.Log("We received a null collision!");
             return;
         }
-        Debug.Log("Collided with object " + collision.gameObject.ToString());
+        //Debug.Log("Collided with object " + collision.gameObject.ToString());
         // Get the parent game object of whatever we hit
         GameObject parentGO = collision.gameObject;
         bool isUnit = false;
@@ -55,7 +55,7 @@ public class SpearController : MonoBehaviour
             }
         }
 
-        Debug.Log("Parent object " + parentGO.ToString() + " isUnit? " + isUnit);
+        //Debug.Log("Parent object " + parentGO.ToString() + " isUnit? " + isUnit);
         if (isUnit)
         { 
             RemoveRigidBodies();
@@ -66,6 +66,7 @@ public class SpearController : MonoBehaviour
                 unitController.HitBySpear(gameObject, velocityBeforeCollision, collision.gameObject);
                 if (!hasDoneDamage)
                 {
+                    Debug.Log("SpearController do damage to " + parentGO.ToString());
                     parentGO.GetComponent<HealthController>().TakeDamage(gameObject, damage);
                     hasDoneDamage = true;
                 }
@@ -79,7 +80,7 @@ public class SpearController : MonoBehaviour
 
             if (angleOfCollision >= 105f || angleOfCollision <= 75f)
             { // Good angle
-                EnableKinematics();
+                RemoveRigidBodies();
             }
             else
             {
@@ -100,7 +101,7 @@ public class SpearController : MonoBehaviour
         Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
         foreach (Rigidbody rb in rbs)
         {
-            if (rb.gameObject.TryGetComponent<FixedJoint>(out FixedJoint fixedJoint))
+            if (rb.gameObject.TryGetComponent(out FixedJoint fixedJoint))
                 Destroy(fixedJoint);
             BoxCollider boxCollider = rb.GetComponentInChildren<BoxCollider>();
             if (boxCollider != null)

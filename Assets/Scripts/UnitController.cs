@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -14,44 +15,61 @@ public enum UnitType
 public class UnitController : MonoBehaviour
 {
     public GameObject Hips;
-    public float totalMass;
+    public bool isDead;
     public UnitType unitType;
     public float sightRange;
     public float attackRange;
     public float damage;
     public float attackSpeed;
-    private Rigidbody[] rigidBodies;
-    private Animator animator;
-    private NavMeshAgent navAgent;
-    private GameObject currentTarget;
-    private float timeSinceLastAttack;
-    private float timeSinceSpear;
-    private float standUpCooldown;
-    private bool recentlyHitBySpear;
-    private bool animatorPresent;
-    private bool inCombat;
-    private bool debug = false;
-    private void Start()
+    protected float timeSinceLastAttack;
+
+    protected Animator animator;
+    protected bool animatorPresent;
+    protected NavMeshAgent navAgent;
+    protected Rigidbody[] rigidBodies;
+    protected float totalMass;
+    protected bool inCombat;
+    protected GameObject currentTarget;
+    protected float standUpCooldown;
+    protected bool recentlyHitBySpear;
+    protected float timeSinceSpear;
+    protected float deathTime = 0f;
+
+    protected virtual void Start()
     {
+        animator = GetComponent<Animator>();
+        animatorPresent = animator != null;
+        inCombat = false;
+        standUpCooldown = 2f;
+        recentlyHitBySpear = false;
+        navAgent = GetComponent<NavMeshAgent>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
+        isDead = false;
         foreach (var rigidBody in rigidBodies)
         {
             rigidBody.isKinematic = true;
             totalMass += rigidBody.mass;
         }
-        navAgent = GetComponent<NavMeshAgent>();
-        standUpCooldown = 2f;
-        recentlyHitBySpear = false;
-        animator = GetComponent<Animator>();
-        if (unitType == UnitType.None)
-        {
-            Debug.Log("UnitType is not set for GO: " + gameObject.ToString());
-        }
-        animatorPresent = animator != null;
-        inCombat = false;
     }
-    private void Update()
+    protected virtual void Update()
     {
+        if (deathTime != 0f)
+        {
+            if (GetComponent<HealthController>().HealthBar.activeInHierarchy)
+            {
+                GetComponent<HealthController>().HealthBar.SetActive(false);
+                animator.enabled = false;
+                foreach (Rigidbody rb in rigidBodies)
+                {
+                    rb.isKinematic = false;
+                }
+            }
+            if (deathTime + 10f < Time.time)
+            {
+                Destroy(gameObject);
+            }
+            return;
+        }
         if (animatorPresent)
         {
             float speedPercent = navAgent.velocity.magnitude / navAgent.speed;
@@ -69,53 +87,23 @@ public class UnitController : MonoBehaviour
                     rb.isKinematic = true;
                 }
                 animator.enabled = true;
-            }
-            else
-            {
-            }
-        }
-        else
-        {
-            if (unitType == UnitType.Attacker)
-            {
-                HandleAttackAI();
-            }
-            if (unitType == UnitType.Defender)
-            {
-                HandleDefendAI();
+                navAgent.enabled = true;
             }
         }
     }
     public void HitBySpear(GameObject incomingSpear, Vector3 incomingVelocity, GameObject bodyPartHit)
     {
         animator.enabled = false;
-        foreach(Rigidbody rb in rigidBodies)
+        foreach (Rigidbody rb in rigidBodies)
         {
             rb.isKinematic = false;
         }
+        navAgent.enabled = false;
         float massRatio = incomingSpear.GetComponent<SpearController>().totalMass / totalMass;
         //Debug.Log("Total mass of unit: " + totalMass + " total mass of Spear: " + incomingSpear.GetComponent<SpearController>().totalMass + " final ratio: " + massRatio);
         bodyPartHit.GetComponent<Rigidbody>().AddForce(5 * massRatio * incomingVelocity, ForceMode.Impulse);
         timeSinceSpear = Time.time;
         recentlyHitBySpear = true;
-    }
-    public void HandleAttackAI()
-    {
-        bool tempInCombat = false;
-        if (currentTarget == null)
-        {
-            currentTarget = GameHandler.instance.Hub;
-            if (currentTarget != null && currentTarget.TryGetComponent(out HealthController healthController))
-            {
-                healthController.onDeath += ClearTarget;
-                navAgent.SetDestination(currentTarget.transform.position);
-            }
-        }
-        else
-        {
-            tempInCombat = MoveToAttackTarget(currentTarget);
-        }
-        inCombat = tempInCombat;
     }
     public bool MoveToAttackTarget(GameObject target)
     {
@@ -176,84 +164,12 @@ public class UnitController : MonoBehaviour
         currentTarget = null;
         inCombat = false;
     }
-    public void HandleDefendAI()
+    public void HandleDeath()
     {
-        if (currentTarget != null)
-        {
-            MoveToAttackTarget(currentTarget);
-        }
-        if (currentTarget == null)
-        {
-            if (!LookForTarget())
-                PatrolCrystal();
-        }
-    }
-    public bool LookForTarget()
-    {
-        List<GameObject> foundUnits = new List<GameObject>();
-        // Utilize physics to create a sphere to check for all colliders within a sight radius
-        Collider[] colliders = Physics.OverlapSphere(transform.position, sightRange);
-        foreach (Collider collider in colliders)
-        {
-            // Check for a UnitController script on a given gameObject and their parents.
-            //Debug.Log("Collider found: " + collider.gameObject.ToString());
-            GameObject parentGO = collider.gameObject;
-            bool topLevelGO = false;
-            // Do an initial check if current GO is toplevel of Attacker/Defender unit.
-            UnitController uc;
-            if (parentGO.TryGetComponent(out uc))
-            {
-                if (uc.unitType == UnitType.Attacker)
-                    topLevelGO = true;
-            }
-            // Keep checking for UnitController script until we find one or we are at the top level of the heirarchy. 
-            while (parentGO.transform.parent != null && !topLevelGO)
-            {
-                parentGO = parentGO.transform.parent.gameObject;
-                if (parentGO.TryGetComponent(out uc))
-                {
-                    if (uc.unitType == UnitType.Attacker)
-                        topLevelGO = true;
-                }
-            }
-            // We found a UnitController attached to a gameObject.
-            if (topLevelGO)
-            {
-                // Add each unique Attacker/Defender into a list
-                bool unitAccountedFor = false;
-                foreach (GameObject go in foundUnits)
-                {
-                    if (parentGO == go)
-                        unitAccountedFor = true;
-                }
-                if (!unitAccountedFor)
-                {
-                    //Debug.Log("Collider " + collider.gameObject.ToString() + " is this GameObject (" + parentGO.ToString() + ") Adding to our foundUnits list.");
-                    foundUnits.Add(parentGO);
-                }
-            }
-        }
-        int index = 0;
-        int indexOfClosestEnemy = -1;
-        if (foundUnits.Count > 0)
-        {
-            float closestEnemy = 999999f;
-            if (Vector3.Distance(transform.position, foundUnits[index].transform.position) < closestEnemy)
-            {
-                closestEnemy = Vector3.Distance(transform.position, foundUnits[index].transform.position);
-                indexOfClosestEnemy = index;
-            }
-            index++;
-        }
-        if (indexOfClosestEnemy != -1)
-        {
-            currentTarget = foundUnits[indexOfClosestEnemy];
-            return true;
-        }
-        return false;
-    }
-    public void PatrolCrystal()
-    {
-
+        Debug.Log("Attacker custom death: " + gameObject.ToString());
+        WaveHandler.instance.RemoveAttackerFromList(gameObject);
+        navAgent.enabled = false;
+        isDead = true;
+        deathTime = Time.time;
     }
 }

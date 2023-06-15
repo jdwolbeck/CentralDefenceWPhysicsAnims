@@ -204,7 +204,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3944869084136055395}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87c78f65a5f0b8f4aa304b897f99e749, type: 3}
   m_Name: 
@@ -239,7 +239,6 @@ GameObject:
   - component: {fileID: 5556257585483273344}
   - component: {fileID: 5417949290129498070}
   - component: {fileID: 5988046007615960196}
-  - component: {fileID: 1243107317403228592}
   m_Layer: 0
   m_Name: Tip
   m_TagString: Untagged
@@ -321,7 +320,7 @@ BoxCollider:
   m_GameObject: {fileID: 5931673407688654818}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1.0032147, z: 1}
   m_Center: {x: -0.000000038731, y: 0.0016043745, z: 1.526438e-10}
@@ -354,16 +353,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spearController: {fileID: 5393925266233490384}
---- !u!135 &1243107317403228592
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5931673407688654818}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.51886386
-  m_Center: {x: -0.032930195, y: -0.082214005, z: -0.00890415}

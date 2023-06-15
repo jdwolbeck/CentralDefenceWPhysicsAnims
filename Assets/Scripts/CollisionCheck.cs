@@ -33,7 +33,7 @@ public class CollisionCheck : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("OnCollisionEntered SPEAR...");
+        //Debug.Log("OnCollisionEntered SPEAR...");
         if (collision == null)
             return;
         spearController.CollidedWithObject(collision, velocityBeforeCollision, spearPositionBeforeCollision, spearRotationBeforeCollision);

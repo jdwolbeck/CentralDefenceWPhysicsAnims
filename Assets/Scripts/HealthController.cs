@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 public class HealthController : MonoBehaviour
 {
-    [SerializeField] private GameObject HealthBar;
+    public GameObject HealthBar;
     public float TotalHealth;
+    public bool customDeath = false;
     private float currentHealth;
     private Slider healthSlider;
 
@@ -33,12 +34,18 @@ public class HealthController : MonoBehaviour
         }
         else
         {
-            healthSlider.normalizedValue = currentHealth / TotalHealth;
+            if (currentHealth >= 0)
+                healthSlider.normalizedValue = currentHealth / TotalHealth;
+            else
+                healthSlider.normalizedValue = 0f;
         }
     }
     private void Die()
     {
-        Debug.Log(gameObject.ToString() + " died.");
-        Destroy(gameObject);
+        if (!customDeath)
+        {
+            Debug.Log(gameObject.ToString() + " died.");
+            Destroy(gameObject);
+        }
     }
 }

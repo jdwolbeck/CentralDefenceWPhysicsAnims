@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public struct Wave
@@ -9,15 +10,22 @@ public struct Wave
 }
 public class WaveHandler : MonoBehaviour
 {
+    public static WaveHandler instance { get; private set; }
+    public TMP_Text WaveTextBox;
     [SerializeField] private List<Wave> waves = new List<Wave>();
     [SerializeField] private List<GameObject> currentAttackers = new List<GameObject>();
     private GameObject attackerPrefab;
     private int waveIndex;
     private bool currentWaveInitialized;
     private float spawnRadius;
+    private float startOfWave;
 
     void Start()
     {
+        if (instance != null && instance != this)
+            Destroy(this);
+        else
+            instance = this;
         for (int i = 1; i < 5; i++)
         {
             Wave wave = new Wave();
@@ -36,8 +44,25 @@ public class WaveHandler : MonoBehaviour
 
         HandleWaveLogic();
     }
+    public bool RemoveAttackerFromList(GameObject attacker)
+    {
+        foreach (GameObject go in currentAttackers)
+        {
+            if (go == attacker)
+            {
+                currentAttackers.Remove(go);
+                return true;
+            }    
+        }
+        return false;
+    }
     private void InitializeWave()
     {
+        if (waveIndex >= waves.Count)
+        {
+            WaveTextBox.text = "GAME OVER";
+            return;
+        }
         // Spawn all of the attackers and store them in our currentAttackers list
         for (int i = 0; i < waves[waveIndex].numAttackers; i++)
         {
@@ -45,13 +70,16 @@ public class WaveHandler : MonoBehaviour
             GameObject attacker = Instantiate(attackerPrefab, spawnPosition, Quaternion.LookRotation(Vector3.zero - spawnPosition));
             currentAttackers.Add(attacker);
         }
+        waveIndex++;
+        WaveTextBox.text = "Wave: " + waveIndex;
         currentWaveInitialized = true;
+        startOfWave = Time.time;
     }
     private void HandleWaveLogic()
     {
         if (currentAttackers.Count == 0)
         {
-
+            currentWaveInitialized = false;
         }
     }
     private Vector3 GetSpawnPosition(float spawnXPosition, int spawnUpOrDown)
