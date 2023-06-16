@@ -109,7 +109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Hips: {fileID: 6456259610830981250}
   isDead: 0
-  unitType: 1
+  unitType: 0
   sightRange: 15
   attackRange: 1.5
   damage: 1

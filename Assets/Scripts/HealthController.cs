@@ -10,6 +10,7 @@ public class HealthController : MonoBehaviour
     public bool customDeath = false;
     private float currentHealth;
     private Slider healthSlider;
+    private bool isDead;
 
     public delegate void OnDeath();
     public OnDeath onDeath;
@@ -18,6 +19,7 @@ public class HealthController : MonoBehaviour
     {
         healthSlider = HealthBar.GetComponent<Slider>();
         currentHealth = TotalHealth;
+        isDead = false;
     }
     void Update()
     {
@@ -27,8 +29,9 @@ public class HealthController : MonoBehaviour
     {
         Debug.Log("GO " + gameObject.ToString() + " took [" + damage + "] damage from " + attacker.ToString());
         currentHealth -= damage;
-        if (currentHealth <= 0)
+        if (currentHealth <= 0 && !isDead)
         {
+            isDead = true;
             onDeath?.Invoke();
             Die();
         }

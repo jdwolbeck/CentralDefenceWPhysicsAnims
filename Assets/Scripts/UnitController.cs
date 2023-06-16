@@ -8,9 +8,9 @@ using UnityEngine.Animations;
 
 public enum UnitType
 {
-    None,
     Defender,
-    Attacker
+    Attacker,
+    UnitCount
 }
 public class UnitController : MonoBehaviour
 {
@@ -113,22 +113,16 @@ public class UnitController : MonoBehaviour
             return false;
         if (currentTarget != target)
             currentTarget = target;
-        if (navAgent.remainingDistance < attackRange && navAgent.remainingDistance > 0.1f && navAgent.speed > 0.1f)
-        {
-            navAgent.SetDestination(transform.position);
-            reachedTarget = true;
-        }
         if (Vector3.Distance(transform.position, currentTarget.transform.position) < attackRange)
         {
+            if (navAgent.remainingDistance > 0.1f)
+            {
+                navAgent.SetDestination(transform.position);
+            }
             inRangeOfTarget = true;
             if (currentTarget == null)
                 Debug.Log("Current target null for some reason on " + gameObject.ToString());
             Attack(currentTarget);
-        }
-        else if (reachedTarget)
-        {
-            Debug.Log("ISSUE: We stopped moving because we reached the target but the distance to the target is not < attackRange. Trying to reassign target destination.");
-            navAgent.SetDestination(currentTarget.transform.position);
         }
         else
         {
@@ -146,6 +140,8 @@ public class UnitController : MonoBehaviour
         }
         if (target.TryGetComponent(out HealthController healthController))
         {
+            Quaternion lookOnLook = Quaternion.LookRotation(currentTarget.transform.position - transform.position);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookOnLook, Time.deltaTime * 3);
             if (Time.time > timeSinceLastAttack + attackCooldown)
             {
                 healthController.TakeDamage(gameObject, damage);
@@ -166,10 +162,16 @@ public class UnitController : MonoBehaviour
     }
     public void HandleDeath()
     {
-        Debug.Log("Attacker custom death: " + gameObject.ToString());
-        WaveHandler.instance.RemoveAttackerFromList(gameObject);
+        Debug.Log("Unit custom death: " + gameObject.ToString());
+
         navAgent.enabled = false;
-        isDead = true;
         deathTime = Time.time;
+        isDead = true;
+
+        if (unitType == UnitType.Attacker)
+        {
+            WaveHandler.instance.RemoveAttackerFromList(gameObject);
+        }
+        ItemHandler.instance.HandleMonsterItemDrop(unitType, gameObject);
     }
 }

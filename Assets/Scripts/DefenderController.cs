@@ -12,50 +12,21 @@ public class DefenderController : UnitController
     protected override void Start()
     {
         base.Start();
-        if (unitType == UnitType.None)
-        {
-            Debug.Log("UnitType is not set for GO: " + gameObject.ToString());
-        }
-        if (unitType == UnitType.Attacker)
-        {
-            HealthController hc = GetComponent<HealthController>();
-            hc.onDeath += HandleDeath;
-            hc.customDeath = true;
-        }
+        HealthController hc = GetComponent<HealthController>();
+        hc.onDeath += HandleDeath;
+        hc.customDeath = true;
     }
     protected virtual void Update()
     {
         base.Update();
         if (!recentlyHitBySpear && !isDead)
         {
-            if (unitType == UnitType.Attacker)
-            {
-                //HandleAttackAI();
-            }
             if (unitType == UnitType.Defender)
             {
                 HandleDefendAI();
             }
         }
     }
-    /*public void HandleAttackAI()
-    {
-        bool tempInCombat = false;
-        if (currentTarget == null)
-        {
-            currentTarget = GameHandler.instance.Hub;
-            if (currentTarget != null && currentTarget.TryGetComponent(out HealthController healthController))
-            {
-                healthController.onDeath += ClearTarget;
-                navAgent.SetDestination(currentTarget.transform.position);
-            }
-        }
-        else
-        {
-            tempInCombat = MoveToAttackTarget(currentTarget);
-        }
-        inCombat = tempInCombat;
-    }*/
     public void HandleDefendAI()
     {
         if (currentTarget != null)

@@ -53,6 +53,7 @@ public class TODO_List
      *  - Local coop on something like steam could help eachother attack a region where the monsters are doubled and health/damage increased by x% (individual drops)
      *      - Individual Drops, Zone traveling UI disables for the Guest player. Host player will initiate all activities. (Maybe Guest needs to Ready up)
      *  - PvP a little arena to test out your might
+     *  - Steam friend leaderboards
      *
      * UI:
      * Inventories:
