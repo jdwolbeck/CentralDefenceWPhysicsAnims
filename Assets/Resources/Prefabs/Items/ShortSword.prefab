@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7912380177359739235}
   - component: {fileID: 7912380177359739233}
   - component: {fileID: 7912380177359739234}
+  - component: {fileID: 6549430089366615914}
   m_Layer: 0
   m_Name: ShortSword
   m_TagString: Untagged
@@ -83,3 +84,15 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6549430089366615914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7912380177359739236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdd37cabe243823469f2fa03da8cae16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
