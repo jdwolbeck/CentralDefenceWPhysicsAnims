@@ -5,16 +5,17 @@ using UnityEngine;
 
 public struct Wave
 {
-    public int numAttackers;
+    public int numMobs;
     public float intensity;
 }
 public class WaveHandler : MonoBehaviour
 {
     public static WaveHandler instance { get; private set; }
+    public GameObject MobFolder;
     public TMP_Text WaveTextBox;
     [SerializeField] private List<Wave> waves = new List<Wave>();
-    [SerializeField] private List<GameObject> currentAttackers = new List<GameObject>();
-    private GameObject attackerPrefab;
+    [SerializeField] private List<GameObject> currentMobs = new List<GameObject>();
+    private GameObject mobPrefab;
     private int waveIndex;
     private bool currentWaveInitialized;
     private float spawnRadius;
@@ -29,11 +30,11 @@ public class WaveHandler : MonoBehaviour
         for (int i = 1; i < 5; i++)
         {
             Wave wave = new Wave();
-            wave.numAttackers = i;
+            wave.numMobs = i;
             wave.intensity = i;
             waves.Add(wave);
         }
-        attackerPrefab = Resources.Load("Prefabs/Attacker") as GameObject;
+        mobPrefab = Resources.Load("Prefabs/Mob") as GameObject;
         currentWaveInitialized = false;
         spawnRadius = 20f;
     }
@@ -44,13 +45,13 @@ public class WaveHandler : MonoBehaviour
 
         HandleWaveLogic();
     }
-    public bool RemoveAttackerFromList(GameObject attacker)
+    public bool RemoveMobFromList(GameObject mob)
     {
-        foreach (GameObject go in currentAttackers)
+        foreach (GameObject go in currentMobs)
         {
-            if (go == attacker)
+            if (go == mob)
             {
-                currentAttackers.Remove(go);
+                currentMobs.Remove(go);
                 return true;
             }    
         }
@@ -63,12 +64,13 @@ public class WaveHandler : MonoBehaviour
             WaveTextBox.text = "GAME OVER";
             return;
         }
-        // Spawn all of the attackers and store them in our currentAttackers list
-        for (int i = 0; i < waves[waveIndex].numAttackers; i++)
+        // Spawn all of the mobs and store them in our currentMobss list
+        for (int i = 0; i < waves[waveIndex].numMobs; i++)
         {
             Vector3 spawnPosition = GetSpawnPosition(Random.Range(-spawnRadius, spawnRadius), Random.Range(0, 2));
-            GameObject attacker = Instantiate(attackerPrefab, spawnPosition, Quaternion.LookRotation(Vector3.zero - spawnPosition));
-            currentAttackers.Add(attacker);
+            GameObject mob = Instantiate(mobPrefab, spawnPosition, Quaternion.LookRotation(Vector3.zero - spawnPosition));
+            mob.transform.SetParent(MobFolder.transform);
+            currentMobs.Add(mob);
         }
         waveIndex++;
         WaveTextBox.text = "Wave: " + waveIndex;
@@ -77,7 +79,7 @@ public class WaveHandler : MonoBehaviour
     }
     private void HandleWaveLogic()
     {
-        if (currentAttackers.Count == 0)
+        if (currentMobs.Count == 0)
         {
             currentWaveInitialized = false;
         }

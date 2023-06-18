@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe82d5272020e1747b70361c609eec08, type: 3}
   m_Name: Hammer
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 3586095754107488041, guid: 23222904f3378534e8b8713cf0bcfa5e, type: 3}
+  itemPrefab: {fileID: 1477316315698255646, guid: 23222904f3378534e8b8713cf0bcfa5e, type: 3}
   itemType: 2

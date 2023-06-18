@@ -6,17 +6,18 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations;
 
-public enum UnitType
+public enum EntityType
 {
-    Defender,
-    Attacker,
-    UnitCount
+    Hero,
+    Mercenary,
+    Mob,
+    EntityCount
 }
-public class UnitController : MonoBehaviour
+public class EntityController : MonoBehaviour
 {
     public GameObject Hips;
     public bool isDead;
-    public UnitType unitType;
+    public EntityType entityType;
     public float sightRange;
     public float attackRange;
     public float damage;
@@ -35,6 +36,9 @@ public class UnitController : MonoBehaviour
     protected float timeSinceSpear;
     protected float deathTime = 0f;
 
+    protected HealthController currentTargetHC;
+    protected List<float> timeToDamageEnemy;
+
     protected virtual void Start()
     {
         animator = GetComponent<Animator>();
@@ -50,6 +54,7 @@ public class UnitController : MonoBehaviour
             rigidBody.isKinematic = true;
             totalMass += rigidBody.mass;
         }
+        timeToDamageEnemy = new List<float>();
     }
     protected virtual void Update()
     {
@@ -90,6 +95,12 @@ public class UnitController : MonoBehaviour
                 navAgent.enabled = true;
             }
         }
+        if (timeToDamageEnemy.Count > 0 && Time.time > timeToDamageEnemy[0] && currentTargetHC != null)
+        {
+            currentTargetHC.TakeDamage(gameObject, damage);
+            timeToDamageEnemy.RemoveAt(0);
+
+        }
     }
     public void HitBySpear(GameObject incomingSpear, Vector3 incomingVelocity, GameObject bodyPartHit)
     {
@@ -100,7 +111,7 @@ public class UnitController : MonoBehaviour
         }
         navAgent.enabled = false;
         float massRatio = incomingSpear.GetComponent<SpearController>().totalMass / totalMass;
-        //Debug.Log("Total mass of unit: " + totalMass + " total mass of Spear: " + incomingSpear.GetComponent<SpearController>().totalMass + " final ratio: " + massRatio);
+        //Debug.Log("Total mass of entity: " + totalMass + " total mass of Spear: " + incomingSpear.GetComponent<SpearController>().totalMass + " final ratio: " + massRatio);
         bodyPartHit.GetComponent<Rigidbody>().AddForce(5 * massRatio * incomingVelocity, ForceMode.Impulse);
         timeSinceSpear = Time.time;
         recentlyHitBySpear = true;
@@ -108,11 +119,11 @@ public class UnitController : MonoBehaviour
     public bool MoveToAttackTarget(GameObject target)
     {
         bool inRangeOfTarget = false;
-        bool reachedTarget = false;
         if (target == null)
             return false;
         if (currentTarget != target)
             currentTarget = target;
+
         if (Vector3.Distance(transform.position, currentTarget.transform.position) < attackRange)
         {
             if (navAgent.remainingDistance > 0.1f)
@@ -140,11 +151,14 @@ public class UnitController : MonoBehaviour
         }
         if (target.TryGetComponent(out HealthController healthController))
         {
-            Quaternion lookOnLook = Quaternion.LookRotation(currentTarget.transform.position - transform.position);
+            Quaternion lookOnLook = Quaternion.LookRotation(target.transform.position - transform.position);
             transform.rotation = Quaternion.Slerp(transform.rotation, lookOnLook, Time.deltaTime * 3);
             if (Time.time > timeSinceLastAttack + attackCooldown)
             {
-                healthController.TakeDamage(gameObject, damage);
+                timeToDamageEnemy.Add(Time.time + attackCooldown - 0.2f);
+                Debug.Log("Adding a time to attack for " + timeToDamageEnemy + " at current time " + Time.time);
+                currentTargetHC = healthController;
+                //healthController.TakeDamage(gameObject, damage);
                 timeSinceLastAttack = Time.time;
             }
         }
@@ -158,20 +172,21 @@ public class UnitController : MonoBehaviour
     {
         Debug.Log("Current target died, removing");
         currentTarget = null;
+        currentTargetHC = null;
         inCombat = false;
     }
     public void HandleDeath()
     {
-        Debug.Log("Unit custom death: " + gameObject.ToString());
+        Debug.Log("Entity custom death: " + gameObject.ToString());
 
         navAgent.enabled = false;
         deathTime = Time.time;
         isDead = true;
 
-        if (unitType == UnitType.Attacker)
+        if (entityType == EntityType.Mob)
         {
-            WaveHandler.instance.RemoveAttackerFromList(gameObject);
+            WaveHandler.instance.RemoveMobFromList(gameObject);
         }
-        ItemHandler.instance.HandleMonsterItemDrop(unitType, gameObject);
+        ItemHandler.instance.HandleMonsterItemDrop(entityType, gameObject);
     }
 }

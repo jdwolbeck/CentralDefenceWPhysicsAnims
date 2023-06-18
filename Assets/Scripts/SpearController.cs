@@ -39,31 +39,31 @@ public class SpearController : MonoBehaviour
         //Debug.Log("Collided with object " + collision.gameObject.ToString());
         // Get the parent game object of whatever we hit
         GameObject parentGO = collision.gameObject;
-        bool isUnit = false;
-        if (parentGO.TryGetComponent(out UnitController tmp2))
+        bool isEntity = false;
+        if (parentGO.TryGetComponent(out EntityController tmp2))
         {
-            //Debug.Log("Found unit controller on unit we hit with spear.");
-            isUnit = true;
+            //Debug.Log("Found entity controller on entity we hit with spear.");
+            isEntity = true;
         }
-        while (parentGO.transform.parent != null && !isUnit)
+        while (parentGO.transform.parent != null && !isEntity)
         {
             parentGO = parentGO.transform.parent.gameObject;
-            if (parentGO.TryGetComponent(out UnitController tmp))
+            if (parentGO.TryGetComponent(out EntityController tmp))
             {
-                //Debug.Log("Found unit controller on unit we hit with spear.");
-                isUnit = true;
+                //Debug.Log("Found entity controller on entity we hit with spear.");
+                isEntity = true;
             }
         }
 
-        //Debug.Log("Parent object " + parentGO.ToString() + " isUnit? " + isUnit);
-        if (isUnit)
+        //Debug.Log("Parent object " + parentGO.ToString() + " isEntity? " + isEntity);
+        if (isEntity)
         { 
             RemoveRigidBodies();
-            // Set this spear to be a child of the unit it hit
+            // Set this spear to be a child of the entity it hit
             transform.parent = collision.transform;
-            if (parentGO.TryGetComponent(out UnitController unitController))
+            if (parentGO.TryGetComponent(out EntityController entityController))
             {
-                unitController.HitBySpear(gameObject, velocityBeforeCollision, collision.gameObject);
+                entityController.HitBySpear(gameObject, velocityBeforeCollision, collision.gameObject);
                 if (!hasDoneDamage)
                 {
                     Debug.Log("SpearController do damage to " + parentGO.ToString());
@@ -73,7 +73,7 @@ public class SpearController : MonoBehaviour
             }
         }
         else
-        { // Some other object other than a unit was hit, just stick based on angle
+        { // Some other object other than a entity was hit, just stick based on angle
             float angleOfCollision = Vector3.Angle(collision.GetContact(0).normal, velocityBeforeCollision);
             //Debug.DrawRay(collision.GetContact(0).point, collision.GetContact(0).normal, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
             //Debug.Log("Angle of collision: " + angleOfCollision);

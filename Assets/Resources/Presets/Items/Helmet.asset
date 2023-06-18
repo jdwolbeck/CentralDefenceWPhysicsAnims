@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe82d5272020e1747b70361c609eec08, type: 3}
   m_Name: Helmet
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 7616021598279034646, guid: 3341ba046201162488d9afef75e572a2, type: 3}
-  itemName: Helmet
+  itemPrefab: {fileID: 2024056738418904795, guid: 3341ba046201162488d9afef75e572a2, type: 3}
+  itemType: 0

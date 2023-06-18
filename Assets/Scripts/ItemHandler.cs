@@ -4,13 +4,13 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static MonsterDropPool;
+using static MobDropPool;
 
 public class ItemHandler : MonoBehaviour
 {
     public static ItemHandler instance { get; private set; }
     [SerializeField] private List<GameObject> groundItems;
-    private bool itemDebug = false;
+    private bool itemDebug = true;
     void Start()
     {
         if (instance != null && instance != this)
@@ -19,11 +19,11 @@ public class ItemHandler : MonoBehaviour
             instance = this;
         groundItems = new List<GameObject>();
     }
-    public void HandleMonsterItemDrop(UnitType unitType, GameObject unitObject)
+    public void HandleMonsterItemDrop(EntityType entityType, GameObject entityObject)
     {
         // Figure out if the monster rolled for any kind of loot to drop
         // This will give you the generic type of item that is being dropped
-        ItemTypes itemToDrop = RollForItemDrop(unitType);
+        ItemTypes itemToDrop = RollForItemDrop(entityType);
         if (itemToDrop == ItemTypes.ItemTypeCount)
             return;
 
@@ -33,27 +33,27 @@ public class ItemHandler : MonoBehaviour
 
         // Get the items scriptable object and spawn it in
         GameObject itemPrefab = ResourceDictionary.instance.GetItemPreset(itemToDrop).itemPrefab;
-        GameObject droppedItem = Instantiate(itemPrefab, unitObject.transform.position, Quaternion.identity);
+        GameObject droppedItem = Instantiate(itemPrefab, entityObject.transform.position, Quaternion.identity);
         groundItems.Add(droppedItem);
     }
-    public ItemTypes RollForItemDrop(UnitType unitType)
+    public ItemTypes RollForItemDrop(EntityType entityType)
     {
         ItemTypes itemToDrop = ItemTypes.ItemTypeCount;
-        switch (unitType)
+        switch (entityType)
         {
-            case UnitType.Attacker:
+            case EntityType.Mob:
                 float itemRoll = Random.Range(0, 1f);
                 float cumulativeItemRollChance = 0f;
-                if (itemDebug) Debug.Log("Attacker death is rolling for item, itemRoll = " + itemRoll + " (0 helmet .2 chest .4 legs .6 gloves .8 boots 1.0");
+                if (itemDebug) Debug.Log("Mob death is rolling for item, itemRoll = " + itemRoll + " (0 helmet .2 chest .4 legs .6 gloves .8 boots 1.0");
                 int itemIndex = 0;
                 while (cumulativeItemRollChance <= itemRoll && itemIndex < (int)ItemTypes.ItemTypeCount)
                 {
-                    if (itemIndex >= monsterDropTable[(int)unitType].itemDropList.Count)
+                    if (itemIndex >= mobDropTable[(int)entityType].itemDropList.Count)
                     {
                         break;
                     }
 
-                    DropTableItem currentItem = monsterDropTable[(int)unitType].itemDropList[itemIndex];                
+                    DropTableItem currentItem = mobDropTable[(int)entityType].itemDropList[itemIndex];                
                     if (cumulativeItemRollChance + currentItem.itemDropChance >= itemRoll)
                     {
                         if (itemDebug) Debug.Log("We found the item that we should drop: " + currentItem.itemType.ToString());
@@ -69,7 +69,7 @@ public class ItemHandler : MonoBehaviour
                     itemIndex++;
                 }
                 break;
-            case UnitType.Defender:
+            case EntityType.Hero:
                 break;
             default:
                 break;

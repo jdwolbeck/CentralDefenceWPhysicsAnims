@@ -27,7 +27,7 @@ public class HealthController : MonoBehaviour
     }
     public void TakeDamage(GameObject attacker, float damage)
     {
-        Debug.Log("GO " + gameObject.ToString() + " took [" + damage + "] damage from " + attacker.ToString());
+        //Debug.Log("GO " + gameObject.ToString() + " took [" + damage + "] damage from " + attacker.ToString());
         currentHealth -= damage;
         if (currentHealth <= 0 && !isDead)
         {

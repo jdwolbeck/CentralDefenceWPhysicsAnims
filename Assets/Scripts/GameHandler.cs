@@ -28,7 +28,7 @@ public class GameHandler : MonoBehaviour
                 destinationPoint = hit.point;
             }
 
-            if (destinationPoint != Vector3.zero)
+            if (Input.GetKey(KeyCode.LeftShift) && destinationPoint != Vector3.zero)
             {
                 Vector3 spearSpawnPosition = Camera.main.transform.position + (-2 * Camera.main.transform.forward);
                 Quaternion spearRotation = Quaternion.FromToRotation(Vector3.forward, destinationPoint - spearSpawnPosition);

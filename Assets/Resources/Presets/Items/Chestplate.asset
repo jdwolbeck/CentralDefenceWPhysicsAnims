@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe82d5272020e1747b70361c609eec08, type: 3}
   m_Name: Chestplate
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 7887425086348218064, guid: 47ed761e20e95da4e83dc995225dcc77, type: 3}
+  itemPrefab: {fileID: 4621148998620340675, guid: 47ed761e20e95da4e83dc995225dcc77, type: 3}
   itemType: 1

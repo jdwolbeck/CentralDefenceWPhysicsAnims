@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class LimbCollisionCheck : MonoBehaviour
 {
-    [SerializeField] private UnitController unitController;
+    [SerializeField] private EntityController entityController;
     public void HitBySpear(GameObject incomingSpear, Vector3 incomingVelocity, GameObject bodyPartHit)
     {
         Debug.Log("LimbCollisionCheck");
-        unitController.HitBySpear(incomingSpear, incomingVelocity, bodyPartHit);
+        entityController.HitBySpear(incomingSpear, incomingVelocity, bodyPartHit);
     }
 }

@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations;
 
-public class AttackerController : UnitController
+public class MobController : EntityController
 {
-    private bool debug = false;
+    //private bool debug = false;
 
     protected override void Start()
     {
@@ -16,15 +16,12 @@ public class AttackerController : UnitController
         hc.onDeath += HandleDeath;
         hc.customDeath = true;
     }
-    protected virtual void Update()
+    protected override void Update()
     {
         base.Update();
         if (!recentlyHitBySpear && !isDead)
         {
-            if (unitType == UnitType.Attacker)
-            {
-                HandleAttackAI();
-            }
+            HandleAttackAI();
         }
     }
     public void HandleAttackAI()
