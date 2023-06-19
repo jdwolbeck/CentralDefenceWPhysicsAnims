@@ -13,7 +13,7 @@ public enum ItemTypes
 }
 public struct DropTableItem
 {
-    public ItemTypes itemType;
+    public ItemGroupsEnum itemType;
     public float itemDropChance;
 }
 public struct MobDropTable
@@ -32,19 +32,20 @@ public static class MobDropPool
             switch ((EntityType)i)
             {
                 case EntityType.Hero:
-                    MobDropTable heroDropTable = new MobDropTable
+                    /*MobDropTable heroDropTable = new MobDropTable
                     {
                         entityType = EntityType.Hero,
                         itemDropList = new List<DropTableItem>()
                     {
-                        new DropTableItem { itemType = ItemTypes.Helmet, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Chest, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Legs, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Gloves, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Boots, itemDropChance = 0.2f }
+                        new DropTableItem { itemType = ItemGroupsEnum.Helmet, itemDropChance = 0.2f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Chest, itemDropChance = 0.2f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Legs, itemDropChance = 0.2f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Gloves, itemDropChance = 0.2f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Boots, itemDropChance = 0.2f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Boots, itemDropChance = 0.2f },
                     }
                     };
-                    MobDropPool.mobDropTable.Add(heroDropTable);
+                    MobDropPool.mobDropTable.Add(heroDropTable);*/
                     break;
                 case EntityType.Mob:
                     MobDropTable mobDropTable = new MobDropTable
@@ -52,17 +53,23 @@ public static class MobDropPool
                         entityType = EntityType.Mob,
                         itemDropList = new List<DropTableItem>()
                     {
-                        new DropTableItem { itemType = ItemTypes.Helmet, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Chest, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Legs, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Gloves, itemDropChance = 0.2f },
-                        new DropTableItem { itemType = ItemTypes.Boots, itemDropChance = 0.2f }
+                        new DropTableItem { itemType = ItemGroupsEnum.Helmet, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Chest, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Legs, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Gloves, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Boots, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Belt, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Amulet, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.RingLeft, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.RingRight, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.OneHandWeapon, itemDropChance = 1f },
+                        new DropTableItem { itemType = ItemGroupsEnum.Shield, itemDropChance = 1f }
                     }
                     };
                     MobDropPool.mobDropTable.Add(mobDropTable);
                     break;
                 case EntityType.Mercenary:
-                    MobDropTable mercDropTable = new MobDropTable
+                    /*MobDropTable mercDropTable = new MobDropTable
                     {
                         entityType = EntityType.Mercenary,
                         itemDropList = new List<DropTableItem>()
@@ -74,7 +81,7 @@ public static class MobDropPool
                         new DropTableItem { itemType = ItemTypes.Boots, itemDropChance = 0.025f }
                     }
                     };
-                    MobDropPool.mobDropTable.Add(mercDropTable);
+                    MobDropPool.mobDropTable.Add(mercDropTable);*/
                     break;
                 default:
                     Debug.Log("ISSUE::MobDropPool does not have an entry for EntityType of " + i + " please fill in date for this entry.");

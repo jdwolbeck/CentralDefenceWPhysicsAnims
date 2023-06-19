@@ -1,3 +1,4 @@
+using Banspad.Storage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,8 +23,10 @@ public class EntityController : MonoBehaviour
     public float attackRange;
     public float damage;
     public float attackSpeed;
-    protected float timeSinceLastAttack;
 
+    public EntityItemsExtended Items;
+
+    protected float timeSinceLastAttack;
     protected Animator animator;
     protected bool animatorPresent;
     protected NavMeshAgent navAgent;
@@ -55,6 +58,25 @@ public class EntityController : MonoBehaviour
             totalMass += rigidBody.mass;
         }
         timeToDamageEnemy = new List<float>();
+
+        // Configure Equipment inventory setup
+        Items = new EntityItemsExtended();
+        //Equipment
+        Items.EquipmentContainer = new ItemContainerEquipment(false);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.OneHandWeapon);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Shield);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Helmet);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Chest);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Legs);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Gloves);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Boots);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Belt);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.RingLeft);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.RingRight);
+        Items.EquipmentContainer.DefineSingleEquipmentSlot((int)ItemGroupsEnum.Amulet);
+
+        //Other Storage
+        Items.AddNewGenericStorage((int)StorageTypesEnum.EquipmentCharms, 10, 1, new List<int>() { (int)ItemGroupsEnum.Charm });
     }
     protected virtual void Update()
     {
@@ -156,7 +178,7 @@ public class EntityController : MonoBehaviour
             if (Time.time > timeSinceLastAttack + attackCooldown)
             {
                 timeToDamageEnemy.Add(Time.time + attackCooldown - 0.2f);
-                Debug.Log("Adding a time to attack for " + timeToDamageEnemy + " at current time " + Time.time);
+                //Debug.Log("Adding a time to attack for " + timeToDamageEnemy + " at current time " + Time.time);
                 currentTargetHC = healthController;
                 //healthController.TakeDamage(gameObject, damage);
                 timeSinceLastAttack = Time.time;

@@ -21,12 +21,15 @@ public class WaveHandler : MonoBehaviour
     private float spawnRadius;
     private float startOfWave;
 
-    void Start()
+    private void Awake()
     {
         if (instance != null && instance != this)
             Destroy(this);
         else
             instance = this;
+    }
+    void Start()
+    {
         for (int i = 1; i < 5; i++)
         {
             Wave wave = new Wave();

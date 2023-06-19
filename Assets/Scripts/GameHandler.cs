@@ -1,3 +1,4 @@
+using Banspad.Managers;
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,14 +9,24 @@ public class GameHandler : MonoBehaviour
     public static GameHandler instance { get; private set; }
     public GameObject Hub;
     private GameObject spearPrefab;
-    // Start is called before the first frame update
-    void Start()
+
+    private void Awake()
     {
         if (instance != null && instance != this)
             Destroy(this);
         else
             instance = this;
+
+    }
+    void Start()
+    {
         spearPrefab = Resources.Load("Prefabs/Spear") as GameObject;
+
+        //Define all account wide storgae objects
+        ItemStorageManager.Instance.DefineBank(13, 4);
+        ItemStorageManager.Instance.AddNewBankTab();
+        ItemStorageManager.Instance.AddNewGenericStorage((int)StorageTypesEnum.BankGems, 7, 15, new List<int>() { (int)ItemGroupsEnum.Gem });
+        ItemStorageManager.Instance.AddNewGenericStorage((int)StorageTypesEnum.BankRunes, 7, 15, new List<int>() { (int)ItemGroupsEnum.Rune });
     }
     private void Update()
     {
