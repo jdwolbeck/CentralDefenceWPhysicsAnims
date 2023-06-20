@@ -15,7 +15,7 @@ public class ItemHandler : MonoBehaviour
     public static ItemHandler instance { get; private set; }
     [SerializeField] private List<GameObject> groundItems;
     [SerializeField] private List<ItemBase> testItems;
-    private bool itemDebug = false;
+    private bool itemDebug = true;
 
     private void Awake()
     {
@@ -29,15 +29,7 @@ public class ItemHandler : MonoBehaviour
         groundItems = new List<GameObject>();
         testItems = new List<ItemBase>();
         GenerateTestItems();
-    }
-    public void JustinItemDropTest()
-    {
-
-
-
-
-        //ItemStorageManager.Instance.PickupItem(Hero.Items, testItem);
-        //ItemStorageManager.Instance.DisplayEntityEquipment(Hero.Items);
+        UiManager.Instance.DisplayEntityEquipment(Hero.Items);
     }
     public void HandleMonsterItemDrop(EntityType entityType, GameObject entityObject)
     {
@@ -50,7 +42,6 @@ public class ItemHandler : MonoBehaviour
                 {
                     Debug.Log("Dropped " + itemToDrop.ToString());
                     ItemStorageManager.Instance.PickupItem(Hero.Items, item);
-                    ItemStorageManager.Instance.DisplayEntityEquipment(Hero.Items);
                     break;
                 }
             }
@@ -79,18 +70,17 @@ public class ItemHandler : MonoBehaviour
         {
             case EntityType.Mob:
                 float itemRoll = UnityEngine.Random.Range(0f, 11f);
-                float totalRollWeight = 11f;
-                float cumulativeWeight = 0f;
-                if (itemDebug) Debug.Log("Mob death is rolling for item, itemRoll = " + itemRoll + " (0 helmet .2 chest .4 legs .6 gloves .8 boots 1.0");
+                float currentRollWeight = 11f;
+                if (itemDebug) Debug.Log("Mob death is rolling for item, itemRoll = " + itemRoll);
                 int itemIndex = 0;
-                while (totalRollWeight - cumulativeWeight > 0 && itemIndex < 11)
+                while (currentRollWeight > 0 && itemIndex < 11)
                 {
                     if (itemIndex >= mobDropTable[0].itemDropList.Count)
                     {
                         break;
                     }
                     DropTableItem currentItem = mobDropTable[0].itemDropList[itemIndex];
-                    if (itemRoll >= totalRollWeight - currentItem.itemDropChance)
+                    if (itemRoll >= currentRollWeight - currentItem.itemDropChance)
                     {
                         if (itemDebug) Debug.Log("We found the item that we should drop: " + currentItem.itemType.ToString());
                         itemToDrop = currentItem.itemType; 
@@ -98,8 +88,8 @@ public class ItemHandler : MonoBehaviour
                     }
                     else
                     {
-                        if (itemDebug) Debug.Log("Current weight (" + (totalRollWeight - cumulativeWeight) + ") failed for item:" + currentItem.itemType.ToString() + " new cumulativeRoll: " + (cumulativeWeight + currentItem.itemDropChance));
-                        cumulativeWeight += currentItem.itemDropChance;
+                        if (itemDebug) Debug.Log("Current weight (" + currentRollWeight + ") failed for item:" + currentItem.itemType.ToString() + " new weight: " + (currentRollWeight - currentItem.itemDropChance));
+                        currentRollWeight -= currentItem.itemDropChance;
                     }
                     itemIndex++;
                 }

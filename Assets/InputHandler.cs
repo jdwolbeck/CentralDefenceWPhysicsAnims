@@ -15,14 +15,13 @@ public class InputHandler : MonoBehaviour
     }
     private void Start()
     {
-        Debug.Log("Test my booy");
-        //ItemStorageManager.Instance.CharacterInventoryUiGO.HideInventory();
+        //UiManager.Instance.HideInventory();
     }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.I))
         {
-            //ItemStorageManager.Instance.CharacterInventoryUiGO.ToggleInventory();
+            UiManager.Instance.ToggleInventory();
         }
     }
 }
