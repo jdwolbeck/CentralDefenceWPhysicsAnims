@@ -23,7 +23,7 @@ public class GameHandler : MonoBehaviour
         spearPrefab = Resources.Load("Prefabs/Spear") as GameObject;
 
         //Define all account wide storgae objects
-        ItemStorageManager.Instance.DefineBank(13, 4);
+        ItemStorageManager.Instance.DefineBank(13, 6);
         ItemStorageManager.Instance.AddNewBankTab();
         ItemStorageManager.Instance.AddNewGenericStorage((int)StorageTypesEnum.BankGems, 7, 15, new List<int>() { (int)ItemGroupsEnum.Gem });
         ItemStorageManager.Instance.AddNewGenericStorage((int)StorageTypesEnum.BankRunes, 7, 15, new List<int>() { (int)ItemGroupsEnum.Rune });
