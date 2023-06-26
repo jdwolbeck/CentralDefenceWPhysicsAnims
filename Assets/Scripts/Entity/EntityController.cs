@@ -1,7 +1,9 @@
+using Banspad;
 using Banspad.Storage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -23,6 +25,7 @@ public class EntityController : MonoBehaviour
     public float attackRange;
     public float damage;
     public float attackSpeed;
+    public int randomID;
 
     public EntityItemsExtended Items;
 
@@ -44,6 +47,7 @@ public class EntityController : MonoBehaviour
 
     protected virtual void Start()
     {
+        randomID = UnityEngine.Random.Range(0, 100000000);
         animator = GetComponent<Animator>();
         animatorPresent = animator != null;
         inCombat = false;
@@ -209,6 +213,29 @@ public class EntityController : MonoBehaviour
         {
             WaveHandler.instance.RemoveMobFromList(gameObject);
         }
+        if (transform.parent != null && transform.parent.gameObject.TryGetComponent(out SquadController squadController))
+        {
+            // t is instatiated as a temporary EntityController (t =>)
+            // we then set the boolean equation for finding the index, when their temp variable t (it iterates through the list UnitList and sets t to each of the indexes as it goes) we check if its this specific EntityController.
+            int index = squadController.UnitList.FindIndex(t => t == this);
+            Debug.Log("Index of UnitList that we " + gameObject.ToString() + ": " + randomID + ") is " + index);
+            squadController.UnitList.Remove(this);
+            squadController.UnitStateList.RemoveAt(index);
+        }
         ItemHandler.instance.HandleMonsterItemDrop(entityType, gameObject);
+    }
+    public bool GetUnitStateInfo(UnitStateInfo ourStateInfo)
+    {
+        if (transform.parent != null && transform.parent.gameObject.TryGetComponent(out SquadController squadController))
+        {
+            ourStateInfo.Position = transform.position;
+            ourStateInfo.Health = GetComponent<HealthController>().currentHealth;
+            return true;
+        }
+        else
+        {
+            Debug.Log("ERROR: unit (" + gameObject.ToString() + ": " + randomID + ") was unable to find SquadController above it in heirarchy.");
+        }
+        return false;
     }
 }

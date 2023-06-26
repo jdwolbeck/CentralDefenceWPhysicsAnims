@@ -1,3 +1,4 @@
+using Banspad;
 using Banspad.Itemization;
 using Banspad.Managers;
 using System;
@@ -15,7 +16,7 @@ public class ItemHandler : MonoBehaviour
     public static ItemHandler instance { get; private set; }
     [SerializeField] private List<GameObject> groundItems;
     [SerializeField] private List<ItemBase> testItems;
-    private bool itemDebug = true;
+    private bool itemDebug = false;
 
     private void Awake()
     {
@@ -211,149 +212,4 @@ public class ItemHandler : MonoBehaviour
 
         return testItem;
     }
-}
-
-//**********************************************************************
-//****************    Enums Storage Types    ***************************
-//**********************************************************************
-public enum StorageTypesEnum
-{
-    EquipmentCharms,
-    BankGems,
-    BankRunes
-}
-
-//**********************************************************************
-//**********************    Enums Items    *****************************
-//**********************************************************************
-public enum ItemGroupsEnum
-{
-    None = 0,
-    //Equipment
-    Helmet = 100,
-    Chest = 200,
-    Legs = 300,
-    Gloves = 400,
-    Boots = 500,
-    Belt = 600,
-    RingLeft = 700,
-    RingRight = 800,
-    Amulet = 900,
-    OneHandWeapon = 1000,
-    TwoHandWeapon = 1100,
-    Shield = 1200,
-    //Misc
-    Charm = 10000,
-    Gem = 10100,
-    Rune = 10200
-}
-public enum ItemBaseTypesEnum
-{
-    //Armors
-    HelmetLeather = 1,
-    ArmorLeather = 1000,
-    LegsLeather = 2000,
-    BootsLeather = 3000,
-    GlovesLeather = 4000,
-    BeltLeather = 5000,
-    AmuletType1 = 6000,
-    RingType1 = 7000,
-    //Weapon/Shields
-    SwordWood = 8000,
-    ShieldWood = 9000,
-    //Misc
-    CharmType1 = 10000,
-    //Gems
-    GemRough = 20000,
-    GemChipped = 20010,
-    GemFlawed = 20020,
-    GemRegular = 20030,
-    GemFlawless = 20040,
-    GemSquare = 20050,
-    GemFlawlessSquare = 20060,
-    GemStar = 20070,
-    GemFlawlessStar = 20080,
-    GemOctagon = 20090,
-    GemFlawlessOctagon = 20100,
-    GemImperialOctagon = 20110,
-    GemRoyal = 20120,
-    GemMagnificent = 20130,
-    GemPerfect = 20140,
-    //Runes
-    RuneAwp = 30000,
-    RuneBix = 30001,
-    RuneCom = 30002
-}
-public enum ItemTierEnum
-{
-    Weak = 0,
-    Standard = 1,
-    Elite = 2
-}
-public enum ItemQualityEnum
-{
-    Ethereal = 1,
-    Basic = 10,
-    Magic = 11,
-    Rare = 12,
-    Unique = 20,
-    Crafted = 30,
-    Runeword = 40
-}
-public enum ItemTextureIdEnum
-{
-    None = 0,
-    //Armors
-    HelmetLeather = 1,
-    ArmorLeather = 1000,
-    LegsLeather = 2000,
-    BootsLeather = 3000,
-    GlovesLeather = 4000,
-    BeltLeather = 5000,
-    AmuletType1 = 6000,
-    RingType1 = 7000,
-    //Weapon/Shields
-    SwordWood = 8000,
-    ShieldWood = 9000,
-    //Misc
-    CharmType1 = 10000,
-    //Gems
-    GemRough = 20000,
-    GemChipped = 20010,
-    GemFlawed = 20020,
-    GemRegular = 20030,
-    GemFlawless = 20040,
-    GemSquare = 20050,
-    GemFlawlessSquare = 20060,
-    GemStar = 20070,
-    GemFlawlessStar = 20080,
-    GemOctagon = 20090,
-    GemFlawlessOctagon = 20100,
-    GemImperialOctagon = 20110,
-    GemRoyal = 20120,
-    GemMagnificent = 20130,
-    GemPerfect = 20140,
-    //Runes
-    RuneAwp = 30000,
-    RuneBix = 30001,
-    RuneCom = 30002
-}
-
-//**********************************************************************
-//****************    Enums Item Attributes   **************************
-//**********************************************************************
-public enum ItemAttributeTypesEnum
-{
-    //Attributes
-    FlatStrength = 10,
-    FlatDexterity = 11,
-    //Defensive
-    FlatLife = 100,
-    FlatDefense = 101,
-    //Damage
-    FlatDamage = 200,
-    //Utility
-    AddSockets = 1000,
-    //Unique Abilities
-    FreezeTargetOnHit = 10000
 }

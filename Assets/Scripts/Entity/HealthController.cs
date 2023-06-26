@@ -8,7 +8,7 @@ public class HealthController : MonoBehaviour
     public GameObject HealthBar;
     public float TotalHealth;
     public bool customDeath = false;
-    private float currentHealth;
+    public float currentHealth { get; private set; }
     private Slider healthSlider;
     private bool isDead;
 
