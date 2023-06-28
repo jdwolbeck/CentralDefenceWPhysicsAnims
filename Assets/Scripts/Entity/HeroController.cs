@@ -26,15 +26,15 @@ public class HeroController : EntityController
     }
     public void HandleDefendAI()
     {
-        if (currentTarget != null)
+        EntityController closestEntity = FindNearestTarget(this, EntityType.Mob);
+        if (currentTarget != null || (closestEntity != null && closestEntity != currentTarget))
         {
             inCombat = MoveToAttackTarget(currentTarget);
         }
         else
         {
             inCombat = false;
-            if (!LookForTarget())
-                PatrolCrystal();
+            LookForTarget();
         }
     }
     public bool LookForTarget()
@@ -102,9 +102,5 @@ public class HeroController : EntityController
             return true;
         }
         return false;
-    }
-    public void PatrolCrystal()
-    {
-
     }
 }

@@ -1,6 +1,7 @@
 using Banspad;
 using Banspad.Itemization;
 using Banspad.Managers;
+using Banspad.Storage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static MobDropPool;
+using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour
 {
@@ -16,6 +18,7 @@ public class ItemHandler : MonoBehaviour
     public static ItemHandler instance { get; private set; }
     [SerializeField] private List<GameObject> groundItems;
     [SerializeField] private List<ItemBase> testItems;
+    private bool isUIInitialized = false;
     private bool itemDebug = false;
 
     private void Awake()
@@ -25,12 +28,19 @@ public class ItemHandler : MonoBehaviour
         else
             instance = this;
     }
-    void Start()
+    private void Start()
     {
         groundItems = new List<GameObject>();
         testItems = new List<ItemBase>();
-        GenerateTestItems();
-        UiManager.Instance.DisplayEntityEquipment(Hero.Items);
+        GenerateTestItems();       
+    }
+    private void Update()
+    {
+        if (!isUIInitialized && Hero != null && Hero.Items != null)
+        {
+            UiManager.Instance.DisplayEntityEquipment(Hero.Items);
+            isUIInitialized = true;
+        }
     }
     public void HandleMonsterItemDrop(EntityType entityType, GameObject entityObject)
     {
@@ -41,8 +51,8 @@ public class ItemHandler : MonoBehaviour
             {
                 if (item.ItemGroup == (int)itemToDrop)
                 {
-                    Debug.Log("Dropped " + itemToDrop.ToString());
-                    ItemStorageManager.Instance.PickupItem(Hero.Items, item);
+                    if (itemDebug) Debug.Log("Dropped " + itemToDrop.ToString());
+                    ItemStorageManagerExtended.Instance.PickupItem(Hero.Items, item);
                     break;
                 }
             }

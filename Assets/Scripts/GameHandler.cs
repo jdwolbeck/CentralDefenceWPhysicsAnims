@@ -8,6 +8,8 @@ using UnityEngine;
 public class GameHandler : MonoBehaviour
 {
     public static GameHandler instance { get; private set; }
+    public List<SquadController> playerSquads;
+    public List<SquadController> mobSquads;
     public GameObject Hub;
     private GameObject spearPrefab;
 
@@ -18,16 +20,9 @@ public class GameHandler : MonoBehaviour
         else
             instance = this;
 
-    }
-    void Start()
-    {
         spearPrefab = Resources.Load("Prefabs/Spear") as GameObject;
-
-        //Define all account wide storgae objects
-        ItemStorageManager.Instance.DefineBank(13, 6);
-        ItemStorageManager.Instance.AddNewBankTab();
-        ItemStorageManager.Instance.AddNewGenericStorage((int)StorageTypesEnum.BankGems, 7, 15, new List<int>() { (int)ItemGroupsEnum.Gem });
-        ItemStorageManager.Instance.AddNewGenericStorage((int)StorageTypesEnum.BankRunes, 7, 15, new List<int>() { (int)ItemGroupsEnum.Rune });
+        playerSquads = new List<SquadController>();
+        mobSquads = new List<SquadController>();
     }
     private void Update()
     {
@@ -53,6 +48,43 @@ public class GameHandler : MonoBehaviour
                     rb.AddForce(30 * spear.transform.forward, ForceMode.VelocityChange);
                 }
             }
+        }
+    }
+    public void AddSquadToList(SquadController activeSquad, EntityType squadType)
+    {
+        if (activeSquad == null || squadType >= EntityType.EntityCount)
+        {
+            Debug.Log("AddSquadToList: an invalid squad was passed in.");
+            return;
+        }
+        bool squadAccountedFor = false;
+        switch (squadType)
+        {
+            case EntityType.Hero:
+            case EntityType.Mercenary:
+                foreach (SquadController pSquad in playerSquads)
+                {
+                    if (pSquad == activeSquad)
+                    {
+                        squadAccountedFor = true;
+                        break;
+                    }
+                }
+                if (!squadAccountedFor)
+                    playerSquads.Add(activeSquad);
+                break;
+            case EntityType.Mob:
+                foreach (SquadController mSquad in mobSquads)
+                {
+                    if (mSquad == activeSquad)
+                    {
+                        squadAccountedFor = true;
+                        break;
+                    }
+                }
+                if (!squadAccountedFor)
+                    mobSquads.Add(activeSquad);
+                break;
         }
     }
 }

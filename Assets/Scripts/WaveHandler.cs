@@ -16,6 +16,8 @@ public class WaveHandler : MonoBehaviour
     [SerializeField] private List<Wave> waves = new List<Wave>();
     [SerializeField] private List<GameObject> currentMobs = new List<GameObject>();
     private GameObject mobPrefab;
+    private GameObject squadPrefab;
+    private SquadController mobSquad;
     private int waveIndex;
     private bool currentWaveInitialized;
     private float spawnRadius;
@@ -30,7 +32,7 @@ public class WaveHandler : MonoBehaviour
     }
     void Start()
     {
-        for (int i = 1; i < 5; i++)
+        for (int i = 1; i < 10000; i++)
         {
             Wave wave = new Wave();
             wave.numMobs = i;
@@ -38,8 +40,9 @@ public class WaveHandler : MonoBehaviour
             waves.Add(wave);
         }
         mobPrefab = Resources.Load("Prefabs/Mob") as GameObject;
+        squadPrefab = Resources.Load("Prefabs/Squad") as GameObject;
         currentWaveInitialized = false;
-        spawnRadius = 20f;
+        spawnRadius = 50f;
     }
     void Update()
     {
@@ -67,12 +70,17 @@ public class WaveHandler : MonoBehaviour
             WaveTextBox.text = "GAME OVER";
             return;
         }
+        if (mobSquad == null)
+        {
+            GameObject squad = Instantiate(squadPrefab, MobFolder.transform);
+            mobSquad = squad.GetComponent<SquadController>();
+        }
         // Spawn all of the mobs and store them in our currentMobss list
         for (int i = 0; i < waves[waveIndex].numMobs; i++)
         {
             Vector3 spawnPosition = GetSpawnPosition(Random.Range(-spawnRadius, spawnRadius), Random.Range(0, 2));
             GameObject mob = Instantiate(mobPrefab, spawnPosition, Quaternion.LookRotation(Vector3.zero - spawnPosition));
-            mob.transform.SetParent(MobFolder.transform);
+            mob.transform.SetParent(mobSquad.transform);
             currentMobs.Add(mob);
         }
         waveIndex++;

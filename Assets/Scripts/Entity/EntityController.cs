@@ -18,6 +18,7 @@ public enum EntityType
 }
 public class EntityController : MonoBehaviour
 {
+    protected float NAVAGENT_SPEED;
     public GameObject Hips;
     public bool isDead;
     public EntityType entityType;
@@ -25,6 +26,7 @@ public class EntityController : MonoBehaviour
     public float attackRange;
     public float damage;
     public float attackSpeed;
+    public GameObject currentTarget;
     public int randomID;
 
     public EntityItemsExtended Items;
@@ -36,11 +38,15 @@ public class EntityController : MonoBehaviour
     protected Rigidbody[] rigidBodies;
     protected float totalMass;
     protected bool inCombat;
-    protected GameObject currentTarget;
     protected float standUpCooldown;
     protected bool recentlyHitBySpear;
     protected float timeSinceSpear;
     protected float deathTime = 0f;
+    protected bool destinationSet;
+    protected float stoppingDist;
+    protected bool inAttackAnimation;
+
+    protected bool debugEntityController = false;
 
     protected HealthController currentTargetHC;
     protected List<float> timeToDamageEnemy;
@@ -54,8 +60,11 @@ public class EntityController : MonoBehaviour
         standUpCooldown = 2f;
         recentlyHitBySpear = false;
         navAgent = GetComponent<NavMeshAgent>();
+        NAVAGENT_SPEED = navAgent.speed;
         rigidBodies = GetComponentsInChildren<Rigidbody>();
         isDead = false;
+        destinationSet = false;
+        stoppingDist = 0f;
         foreach (var rigidBody in rigidBodies)
         {
             rigidBody.isKinematic = true;
@@ -84,7 +93,7 @@ public class EntityController : MonoBehaviour
     }
     protected virtual void Update()
     {
-        if (deathTime != 0f)
+        if (deathTime != 0f || isDead)
         {
             if (GetComponent<HealthController>().HealthBar.activeInHierarchy)
             {
@@ -104,6 +113,8 @@ public class EntityController : MonoBehaviour
         if (animatorPresent)
         {
             float speedPercent = navAgent.velocity.magnitude / navAgent.speed;
+            if (destinationSet)
+                speedPercent /= 2f;
             animator.SetFloat("SpeedPercent", speedPercent, .1f, Time.deltaTime); // BlendTree Variable, local speed%, transition time between animations, deltaTime
             animator.SetBool("InCombat", inCombat);
         }
@@ -121,11 +132,22 @@ public class EntityController : MonoBehaviour
                 navAgent.enabled = true;
             }
         }
-        if (timeToDamageEnemy.Count > 0 && Time.time > timeToDamageEnemy[0] && currentTargetHC != null)
+        if (timeToDamageEnemy.Count > 0 && Time.time > timeToDamageEnemy[0])
         {
-            currentTargetHC.TakeDamage(gameObject, damage);
+            if (currentTargetHC != null)
+            {
+                currentTargetHC.TakeDamage(gameObject, damage);
+            }
+            inAttackAnimation = false;
             timeToDamageEnemy.RemoveAt(0);
-
+        }
+        if (destinationSet && Vector3.Distance(navAgent.destination, transform.position) <= stoppingDist)
+        {
+            destinationSet = false;
+            navAgent.SetDestination(transform.position);
+            stoppingDist = 0f;
+            if (navAgent.speed != NAVAGENT_SPEED)
+                navAgent.speed = NAVAGENT_SPEED;
         }
     }
     public void HitBySpear(GameObject incomingSpear, Vector3 incomingVelocity, GameObject bodyPartHit)
@@ -137,7 +159,7 @@ public class EntityController : MonoBehaviour
         }
         navAgent.enabled = false;
         float massRatio = incomingSpear.GetComponent<SpearController>().totalMass / totalMass;
-        //Debug.Log("Total mass of entity: " + totalMass + " total mass of Spear: " + incomingSpear.GetComponent<SpearController>().totalMass + " final ratio: " + massRatio);
+        if (debugEntityController) Debug.Log("Total mass of entity: " + totalMass + " total mass of Spear: " + incomingSpear.GetComponent<SpearController>().totalMass + " final ratio: " + massRatio);
         bodyPartHit.GetComponent<Rigidbody>().AddForce(5 * massRatio * incomingVelocity, ForceMode.Impulse);
         timeSinceSpear = Time.time;
         recentlyHitBySpear = true;
@@ -149,6 +171,12 @@ public class EntityController : MonoBehaviour
             return false;
         if (currentTarget != target)
             currentTarget = target;
+        if (destinationSet)
+        {
+            destinationSet = false;
+            if (navAgent.speed != NAVAGENT_SPEED)
+                navAgent.speed = NAVAGENT_SPEED;
+        }
 
         if (Vector3.Distance(transform.position, currentTarget.transform.position) < attackRange)
         {
@@ -158,12 +186,13 @@ public class EntityController : MonoBehaviour
             }
             inRangeOfTarget = true;
             if (currentTarget == null)
-                Debug.Log("Current target null for some reason on " + gameObject.ToString());
+                Debug.Log("ERROR: Current target null for some reason on " + gameObject.ToString());
             Attack(currentTarget);
         }
         else
         {
-            navAgent.SetDestination(currentTarget.transform.position);
+            if (!inAttackAnimation)
+                navAgent.SetDestination(currentTarget.transform.position);
         }
         return inRangeOfTarget;
     }
@@ -172,7 +201,7 @@ public class EntityController : MonoBehaviour
         float attackCooldown = 1 / attackSpeed;
         if (target == null)
         {
-            Debug.Log(gameObject.ToString() + " just tried to attack a null target.");
+            Debug.Log("ERROR: " + gameObject.ToString() + " just tried to attack a null target.");
             return;
         }
         if (target.TryGetComponent(out HealthController healthController))
@@ -181,6 +210,7 @@ public class EntityController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, lookOnLook, Time.deltaTime * 3);
             if (Time.time > timeSinceLastAttack + attackCooldown)
             {
+                inAttackAnimation = true;
                 timeToDamageEnemy.Add(Time.time + attackCooldown - 0.2f);
                 //Debug.Log("Adding a time to attack for " + timeToDamageEnemy + " at current time " + Time.time);
                 currentTargetHC = healthController;
@@ -190,20 +220,20 @@ public class EntityController : MonoBehaviour
         }
         else
         {
-            Debug.Log("ISSUE: Tried to attack something without a healthController: " + target.ToString());
+            Debug.Log("ERROR: Tried to attack something without a healthController: " + target.ToString());
         }
 
     }
     public void ClearTarget()
     {
-        Debug.Log("Current target died, removing");
+        if (debugEntityController) Debug.Log("Current target died, removing");
         currentTarget = null;
         currentTargetHC = null;
         inCombat = false;
     }
     public void HandleDeath()
     {
-        Debug.Log("Entity custom death: " + gameObject.ToString());
+        if (debugEntityController) Debug.Log("Entity custom death: " + gameObject.ToString());
 
         navAgent.enabled = false;
         deathTime = Time.time;
@@ -215,16 +245,12 @@ public class EntityController : MonoBehaviour
         }
         if (transform.parent != null && transform.parent.gameObject.TryGetComponent(out SquadController squadController))
         {
-            // t is instatiated as a temporary EntityController (t =>)
-            // we then set the boolean equation for finding the index, when their temp variable t (it iterates through the list UnitList and sets t to each of the indexes as it goes) we check if its this specific EntityController.
-            int index = squadController.UnitList.FindIndex(t => t == this);
-            Debug.Log("Index of UnitList that we " + gameObject.ToString() + ": " + randomID + ") is " + index);
-            squadController.UnitList.Remove(this);
-            squadController.UnitStateList.RemoveAt(index);
+            if (debugEntityController) Debug.Log("Removing entity " + ToString() + " from Squad " + squadController.ToString());
+            squadController.RemoveEntityFromSquad(this);
         }
         ItemHandler.instance.HandleMonsterItemDrop(entityType, gameObject);
     }
-    public bool GetUnitStateInfo(UnitStateInfo ourStateInfo)
+    public bool GetEntityStateInfo(EntityStateInfo ourStateInfo)
     {
         if (transform.parent != null && transform.parent.gameObject.TryGetComponent(out SquadController squadController))
         {
@@ -237,5 +263,26 @@ public class EntityController : MonoBehaviour
             Debug.Log("ERROR: unit (" + gameObject.ToString() + ": " + randomID + ") was unable to find SquadController above it in heirarchy.");
         }
         return false;
+    }
+    public EntityController FindNearestTarget(EntityController entity, EntityType entityType)
+    {
+        EntityController closestEntity;
+        // TODO fill in this target
+        return null;
+    }
+    public void SetNavAgentDestination(Vector3 destination, float stoppingDistance, float moveSpeedModifier)
+    {
+        if (!recentlyHitBySpear && !isDead)
+        {
+            navAgent.SetDestination(destination);
+            stoppingDist = stoppingDistance;
+            destinationSet = true;
+            if (navAgent.speed == NAVAGENT_SPEED)
+                navAgent.speed *= moveSpeedModifier;
+        }
+    }
+    public bool HasNavAgentDestination()
+    {
+        return destinationSet;
     }
 }
