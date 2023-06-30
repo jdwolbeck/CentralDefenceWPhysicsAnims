@@ -27,17 +27,30 @@ public class MobController : EntityController
     public void HandleAttackAI()
     {
         bool tempInCombat = false;
+        EntityController closestEntity = FindNearestTarget(this);
+        if (closestEntity != null && closestEntity.gameObject != currentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= sightRange)
+        {
+            currentTarget = closestEntity.gameObject;
+            if (currentTarget.TryGetComponent(out currentTargetHC))
+            {
+                currentTargetHC.onDeath += ClearTarget;
+            }
+        }
         if (currentTarget == null)
         {
             currentTarget = GameHandler.instance.Hub;
-            if (currentTarget != null && currentTarget.TryGetComponent(out HealthController healthController))
+            if (currentTarget.TryGetComponent(out currentTargetHC))
             {
-                healthController.onDeath += ClearTarget;
-                navAgent.SetDestination(currentTarget.transform.position);
+                currentTargetHC.onDeath += ClearTarget;
             }
         }
-        else
+        if (currentTarget != null)
         {
+            if (currentTarget.TryGetComponent(out EntityController ec))
+            {
+                if (ec.isDead)
+                    ClearTarget();
+            }
             tempInCombat = MoveToAttackTarget(currentTarget);
         }
         inCombat = tempInCombat;

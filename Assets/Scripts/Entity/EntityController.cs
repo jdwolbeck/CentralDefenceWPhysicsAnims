@@ -7,6 +7,7 @@ using System.Xml;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Analytics;
 using UnityEngine.Animations;
 
 public enum EntityType
@@ -35,6 +36,7 @@ public class EntityController : MonoBehaviour
     protected Animator animator;
     protected bool animatorPresent;
     protected NavMeshAgent navAgent;
+    protected NavMeshObstacle navObstacle;
     protected Rigidbody[] rigidBodies;
     protected float totalMass;
     protected bool inCombat;
@@ -42,7 +44,7 @@ public class EntityController : MonoBehaviour
     protected bool recentlyHitBySpear;
     protected float timeSinceSpear;
     protected float deathTime = 0f;
-    protected bool destinationSet;
+    protected bool isPatrolMoving;
     protected float stoppingDist;
     protected bool inAttackAnimation;
 
@@ -61,9 +63,10 @@ public class EntityController : MonoBehaviour
         recentlyHitBySpear = false;
         navAgent = GetComponent<NavMeshAgent>();
         NAVAGENT_SPEED = navAgent.speed;
+        navObstacle = GetComponent<NavMeshObstacle>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
         isDead = false;
-        destinationSet = false;
+        isPatrolMoving = false;
         stoppingDist = 0f;
         foreach (var rigidBody in rigidBodies)
         {
@@ -95,15 +98,6 @@ public class EntityController : MonoBehaviour
     {
         if (deathTime != 0f || isDead)
         {
-            if (GetComponent<HealthController>().HealthBar.activeInHierarchy)
-            {
-                GetComponent<HealthController>().HealthBar.SetActive(false);
-                animator.enabled = false;
-                foreach (Rigidbody rb in rigidBodies)
-                {
-                    rb.isKinematic = false;
-                }
-            }
             if (deathTime + 10f < Time.time)
             {
                 Destroy(gameObject);
@@ -113,7 +107,7 @@ public class EntityController : MonoBehaviour
         if (animatorPresent)
         {
             float speedPercent = navAgent.velocity.magnitude / navAgent.speed;
-            if (destinationSet)
+            if (isPatrolMoving)
                 speedPercent /= 2f;
             animator.SetFloat("SpeedPercent", speedPercent, .1f, Time.deltaTime); // BlendTree Variable, local speed%, transition time between animations, deltaTime
             animator.SetBool("InCombat", inCombat);
@@ -141,9 +135,9 @@ public class EntityController : MonoBehaviour
             inAttackAnimation = false;
             timeToDamageEnemy.RemoveAt(0);
         }
-        if (destinationSet && Vector3.Distance(navAgent.destination, transform.position) <= stoppingDist)
+        if (isPatrolMoving && (Vector3.Distance(navAgent.destination, transform.position) <= stoppingDist))
         {
-            destinationSet = false;
+            isPatrolMoving = false;
             navAgent.SetDestination(transform.position);
             stoppingDist = 0f;
             if (navAgent.speed != NAVAGENT_SPEED)
@@ -171,16 +165,16 @@ public class EntityController : MonoBehaviour
             return false;
         if (currentTarget != target)
             currentTarget = target;
-        if (destinationSet)
+        if (isPatrolMoving)
         {
-            destinationSet = false;
+            isPatrolMoving = false;
             if (navAgent.speed != NAVAGENT_SPEED)
                 navAgent.speed = NAVAGENT_SPEED;
         }
 
         if (Vector3.Distance(transform.position, currentTarget.transform.position) < attackRange)
         {
-            if (navAgent.remainingDistance > 0.1f)
+            if (navAgent.enabled && navAgent.remainingDistance > 0.1f)
             {
                 navAgent.SetDestination(transform.position);
             }
@@ -192,7 +186,16 @@ public class EntityController : MonoBehaviour
         else
         {
             if (!inAttackAnimation)
+            {
+                if (!navAgent.enabled)
+                {
+                    navObstacle.enabled = false;
+                    navAgent.enabled = true;
+                }
                 navAgent.SetDestination(currentTarget.transform.position);
+            }
+            else // This will help our entity continue the attack animation.
+                inRangeOfTarget = true;
         }
         return inRangeOfTarget;
     }
@@ -211,6 +214,11 @@ public class EntityController : MonoBehaviour
             if (Time.time > timeSinceLastAttack + attackCooldown)
             {
                 inAttackAnimation = true;
+                if (navAgent.enabled)
+                {
+                    navAgent.enabled = false;
+                    navObstacle.enabled = true;
+                }
                 timeToDamageEnemy.Add(Time.time + attackCooldown - 0.2f);
                 //Debug.Log("Adding a time to attack for " + timeToDamageEnemy + " at current time " + Time.time);
                 currentTargetHC = healthController;
@@ -236,6 +244,13 @@ public class EntityController : MonoBehaviour
         if (debugEntityController) Debug.Log("Entity custom death: " + gameObject.ToString());
 
         navAgent.enabled = false;
+        navObstacle.enabled = false;
+        GetComponent<HealthController>().HealthBar.SetActive(false);
+        animator.enabled = false;
+        foreach (Rigidbody rb in rigidBodies)
+        {
+            rb.isKinematic = false;
+        }
         deathTime = Time.time;
         isDead = true;
 
@@ -264,25 +279,58 @@ public class EntityController : MonoBehaviour
         }
         return false;
     }
-    public EntityController FindNearestTarget(EntityController entity, EntityType entityType)
+    public EntityController FindNearestTarget(EntityController entity)
     {
-        EntityController closestEntity;
-        // TODO fill in this target
-        return null;
+        EntityController closestEntity = null;
+        EntityType entityType = entity.entityType;
+        float closestDistance = 0f;
+        List<SquadController> squadList = null;
+        if (entityType == EntityType.Hero || entityType == EntityType.Mercenary)
+        {
+            squadList = GameHandler.instance.mobSquads;
+        }
+        else
+        {
+            squadList = GameHandler.instance.playerSquads;
+        }
+
+        foreach (SquadController squadController in squadList)
+        {
+            foreach (EntityController enemySquadEntity in squadController.EntityList)
+            {
+                if (enemySquadEntity.isDead) continue;
+                if (closestEntity == null ||
+                    Vector3.Distance(entity.transform.position, enemySquadEntity.transform.position) < closestDistance)
+                {
+                    closestEntity = enemySquadEntity;
+                    closestDistance = Vector3.Distance(entity.transform.position, closestEntity.transform.position);
+                }
+            }
+        }
+
+        return closestEntity;
     }
-    public void SetNavAgentDestination(Vector3 destination, float stoppingDistance, float moveSpeedModifier)
+    public void SetNavAgentDestination(Vector3 destination, float stoppingDistance=0f, float moveSpeedModifier=1f)
     {
         if (!recentlyHitBySpear && !isDead)
         {
+            if (!navAgent.enabled)
+            {
+                navObstacle.enabled = false;
+                navAgent.enabled = true;
+            }
             navAgent.SetDestination(destination);
-            stoppingDist = stoppingDistance;
-            destinationSet = true;
+            if (destination != transform.position)
+            {
+                stoppingDist = stoppingDistance;
+                isPatrolMoving = true;
+            }
             if (navAgent.speed == NAVAGENT_SPEED)
                 navAgent.speed *= moveSpeedModifier;
         }
     }
     public bool HasNavAgentDestination()
     {
-        return destinationSet;
+        return isPatrolMoving;
     }
 }

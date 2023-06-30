@@ -38,7 +38,7 @@ public class SquadController : MonoBehaviour
         EntityStateList = new List<EntityStateInfo>();
         EntityList = new List<EntityController>();
         PopulateEntityLists();
-        patrolRadius = Random.Range(4f, 11f);
+        patrolRadius = Random.Range(4f, 8f);
 
     }
     private void Update()

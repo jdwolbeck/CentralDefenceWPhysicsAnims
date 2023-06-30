@@ -26,14 +26,30 @@ public class HeroController : EntityController
     }
     public void HandleDefendAI()
     {
-        EntityController closestEntity = FindNearestTarget(this, EntityType.Mob);
-        if (currentTarget != null || (closestEntity != null && closestEntity != currentTarget))
+        if (currentTarget != null && Vector3.Distance(transform.position, currentTarget.transform.position) > attackRange)
         {
+            EntityController closestEntity = FindNearestTarget(this);
+            if (closestEntity != null && closestEntity.gameObject != currentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= sightRange)
+            {
+                currentTarget = closestEntity.gameObject;
+            }
+        }
+        if (currentTarget != null)
+        {
+            if (currentTarget.GetComponent<EntityController>().isDead)
+            {
+                ClearTarget();
+            }
             inCombat = MoveToAttackTarget(currentTarget);
         }
         else
         {
             inCombat = false;
+            if (!navAgent.enabled)
+            {
+                navObstacle.enabled = false;
+                navAgent.enabled = true;
+            }
             LookForTarget();
         }
     }

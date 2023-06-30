@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6149757896793172863}
   - component: {fileID: 8426747879658642880}
   - component: {fileID: -35518617402759799}
+  - component: {fileID: 2685686747214268496}
   m_Layer: 0
   m_Name: Mercenary
   m_TagString: Untagged
@@ -94,7 +95,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   HealthBar: {fileID: 4525952308734487632}
-  TotalHealth: 10
+  TotalHealth: 250
   customDeath: 0
 --- !u!114 &-35518617402759799
 MonoBehaviour:
@@ -111,12 +112,28 @@ MonoBehaviour:
   Hips: {fileID: 6456259610830981250}
   isDead: 0
   entityType: 1
-  sightRange: 15
+  sightRange: 7
   attackRange: 1.5
-  damage: 0.5
+  damage: 2
   attackSpeed: 1
   currentTarget: {fileID: 0}
   randomID: 0
+--- !u!208 &2685686747214268496
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6149757896793172848}
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 0.5, y: 1, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &6456259609604321710
 GameObject:
   m_ObjectHideFlags: 0
