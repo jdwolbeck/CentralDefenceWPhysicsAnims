@@ -3,18 +3,56 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
-public class EntityStateInfo
-{
-    public Vector3 Position;
-    public float   Health;
-}
 public enum TacticalAIState
 {
     DEFENDING_NEXUS = 0,
     DEFENDING_ANOTHER_HERO,
     ATTACKING_STRONGHOLD
 }
+public class EntityStateInfo
+{
+    public Vector3 Position;
+    public float   Health;
+}
+/*
+public class SquadState
+{ 
+    protected virtual SquadState HandleStateLogic(SquadController squad)
+    {
+        return this;
+    }
+}
+public class SquadGroupingState : SquadState
+{
+    protected override SquadState HandleStateLogic(SquadController squad)
+    {
+        foreach (EntityController entity in squad.EntityList)
+        {
+            if (Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.squadRadius)
+            {
+                return this;
+            }
+        }
+        return new SquadPatrollingState();
+    }
+}
+public class SquadPatrollingState : SquadState
+{
+    protected override SquadState HandleStateLogic(SquadController squad)
+    {
+        foreach (EntityController entity in squad.EntityList)
+        {
+            if (Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.squadRadius)
+            {
+                return new SquadGroupingState();
+            }
+        }
+        return this;
+    }
+}
+*/
 public class SquadController : MonoBehaviour
 {
     public EntityController SquadLeader;
@@ -22,7 +60,7 @@ public class SquadController : MonoBehaviour
     public List<EntityStateInfo> EntityStateList;
     public TacticalAIState curTacticalState;
 
-    private const float squadRadius = 2f;
+    public float squadRadius = 2f;
     private const float groupingCooldown = 0.5f;
     private float lastUpdateTime;
 
@@ -189,7 +227,13 @@ public class SquadController : MonoBehaviour
             Vector3 nextPatrolDestination = 
                 new Vector3(randomizedDestination, 0, squadsNextQuadrant.y * Mathf.Sqrt((patrolRadius*patrolRadius) - (randomizedDestination* randomizedDestination)));
 
-            SquadLeader.SetNavAgentDestination(nextPatrolDestination, 1f, .5f);
+            foreach (EntityController entity in EntityList)
+            {
+                if (entity == SquadLeader)
+                {
+                    SquadLeader.SetNavAgentDestination(nextPatrolDestination, 1f, .5f);
+                }
+            }
         }
     }
     private void SetNewSquadLeader()

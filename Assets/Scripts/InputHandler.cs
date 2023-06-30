@@ -13,10 +13,6 @@ public class InputHandler : MonoBehaviour
         else
             instance = this;
     }
-    private void Start()
-    {
-        //UiManager.Instance.HideInventory();
-    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.I))

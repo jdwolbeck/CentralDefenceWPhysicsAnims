@@ -1,7 +1,6 @@
 using Banspad;
 using Banspad.Itemization;
 using Banspad.Managers;
-using Banspad.Storage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static MobDropPool;
-using static UnityEditor.Progress;
 
 public class ItemHandler : MonoBehaviour
 {
@@ -57,22 +55,6 @@ public class ItemHandler : MonoBehaviour
                 }
             }
         }
-        /* OLD CODE
-            // Figure out if the monster rolled for any kind of loot to drop
-            // This will give you the generic type of item that is being dropped
-            ItemTypes itemToDrop = RollForItemDrop(entityType);
-            if (itemToDrop == ItemTypes.ItemTypeCount)
-                return;
-
-            // Now we can handle the logic for deciding what tier of item this is (White, rare, yellow, unique)
-
-            // Here we handle the logic for determining which stats will be rolled onto this item
-
-            // Get the items scriptable object and spawn it in
-            GameObject itemPrefab = ResourceDictionary.instance.GetItemPreset(itemToDrop).itemPrefab;
-            GameObject droppedItem = Instantiate(itemPrefab, entityObject.transform.position, Quaternion.identity);
-            groundItems.Add(droppedItem); 
-        */
     }
     public ItemGroupsEnum RollForItemDrop(EntityType entityType)
     {
