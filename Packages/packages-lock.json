@@ -9,7 +9,7 @@
         "com.unity.textmeshpro": "3.0.6",
         "com.unity.2d.sprite": "1.0.0"
       },
-      "hash": "3a599261af426f8fe0e21ac25a212b137a3405a3"
+      "hash": "560774da32c10de7cfe2f8e3d7d33089852c43f2"
     },
     "com.banspadgames.rpguitowerdefense": {
       "version": "https://github.com/SyntaxCheck/RPG-TowerDefense-UI.git",
@@ -19,9 +19,9 @@
         "com.unity.mathematics": "1.2.6",
         "com.unity.textmeshpro": "3.0.6",
         "com.unity.2d.sprite": "1.0.0",
-        "com.banspadgames.rpguibase": "1.0.2"
+        "com.banspadgames.rpguibase": "1.0.3"
       },
-      "hash": "affa73be4879169c5ebdbef054e0082de2d63b57"
+      "hash": "d7f6e06c0584757503ddee864ae7a7f0466d1388"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",

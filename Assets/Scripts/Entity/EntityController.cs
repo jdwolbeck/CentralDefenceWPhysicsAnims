@@ -265,7 +265,7 @@ public class EntityController : MonoBehaviour
         }
         ItemHandler.instance.HandleMonsterItemDrop(entityType, gameObject);
     }
-    public bool GetEntityStateInfo(EntityStateInfo ourStateInfo)
+    public bool GetEntityStatusinfo(EntityStatusInfo ourStateInfo)
     {
         if (transform.parent != null && transform.parent.gameObject.TryGetComponent(out SquadController squadController))
         {
@@ -296,7 +296,7 @@ public class EntityController : MonoBehaviour
 
         foreach (SquadController squadController in squadList)
         {
-            foreach (EntityController enemySquadEntity in squadController.EntityList)
+            foreach (EntityController enemySquadEntity in squadController.SquadEntities)
             {
                 if (enemySquadEntity.isDead) continue;
                 if (closestEntity == null ||
@@ -312,7 +312,7 @@ public class EntityController : MonoBehaviour
     }
     public void SetNavAgentDestination(Vector3 destination, float stoppingDistance=0f, float moveSpeedModifier=1f)
     {
-        if (!recentlyHitBySpear && !isDead)
+        if (!recentlyHitBySpear && !isDead && navAgent != null)
         {
             if (!navAgent.enabled)
             {

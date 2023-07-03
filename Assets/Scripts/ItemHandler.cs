@@ -136,8 +136,6 @@ public class ItemHandler : MonoBehaviour
         // Unique Right R
         testItems.Add(GenerateTestItem(ItemGroupsEnum.RingRight, ItemBaseTypesEnum.RingType1, ItemTierEnum.Standard,
                                         ItemQualityEnum.Unique, ItemTextureIdEnum.RingType1, null, true));
-
-
     }
     public ItemBase GenerateTestItem(ItemGroupsEnum itemGroup, ItemBaseTypesEnum itemBaseType, ItemTierEnum itemTier, ItemQualityEnum itemQuality, 
                                      ItemTextureIdEnum itemTextureId, List<ItemAttribute> itemAttributes, bool rndAttributes)
