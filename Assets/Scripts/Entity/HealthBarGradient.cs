@@ -3,16 +3,17 @@ using UnityEngine.UI;
 
 public class HealthBarGradient : MonoBehaviour
 {
-    private Slider slider;
-    public Gradient gradient;
-    public Image fill;
+    public Gradient HealthGradient;
+    public Image FillImage;
 
-    void Start()
+    private Slider slider;
+
+    private void Awake()
     {
         slider = GetComponent<Slider>();
     }
-    void Update()
+    private void Update()
     {
-        fill.color = gradient.Evaluate(slider.normalizedValue);
+        FillImage.color = HealthGradient.Evaluate(slider.normalizedValue);
     }
 }

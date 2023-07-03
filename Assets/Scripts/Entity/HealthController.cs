@@ -1,38 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
+using Banspad;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthController : MonoBehaviour
 {
-    public GameObject HealthBar;
+    public float CurrentHealth { get; private set; }
     public float TotalHealth;
-    public bool customDeath = false;
-    public float currentHealth { get; private set; }
+    public bool CustomDeath;
+    public GameObject HealthBar;
+
     private Slider healthSlider;
     private bool isDead;
+    private bool healthDebug;
     private float timeSinceDamage;
 
     public delegate void OnDeath();
     public OnDeath onDeath;
 
-    void Start()
+    private void Awake()
     {
         healthSlider = HealthBar.GetComponent<Slider>();
-        currentHealth = TotalHealth;
+        CurrentHealth = TotalHealth;
         timeSinceDamage = 0f;
         HealthBar.SetActive(false);
         isDead = false;
+        CustomDeath = false;
+        healthDebug = false;
     }
-    void Update()
+    private void Update()
     {
         HandleHealthBarVisibility();
     }
     public void TakeDamage(GameObject attacker, float damage)
     {
-        //Debug.Log("GO " + gameObject.ToString() + " took [" + damage + "] damage from " + attacker.ToString());
-        currentHealth -= damage;
-        if (currentHealth <= 0 && !isDead)
+        Logging.Log("GO " + gameObject.ToString() + " took [" + damage + "] damage from " + attacker.ToString(), healthDebug);
+
+        CurrentHealth -= damage;
+
+        if (CurrentHealth <= 0 && !isDead)
         {
             isDead = true;
             onDeath?.Invoke();
@@ -40,21 +45,23 @@ public class HealthController : MonoBehaviour
         }
         else
         {
-            if (currentHealth >= 0)
+            if (CurrentHealth >= 0)
             {
-                healthSlider.normalizedValue = currentHealth / TotalHealth;
+                healthSlider.normalizedValue = CurrentHealth / TotalHealth;
                 HealthBar.SetActive(true);
                 timeSinceDamage = Time.time;
             }
             else
+            {
                 healthSlider.normalizedValue = 0f;
+            }
         }
     }
     private void Die()
     {
-        if (!customDeath)
+        if (!CustomDeath)
         {
-            Debug.Log(gameObject.ToString() + " died.");
+            Logging.Log(gameObject.ToString() + " died.", healthDebug);
             Destroy(gameObject);
         }
     }

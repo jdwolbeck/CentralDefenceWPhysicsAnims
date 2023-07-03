@@ -7,52 +7,54 @@ using UnityEngine.Animations;
 
 public class MobController : EntityController
 {
-    //private bool debug = false;
-
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
+
         HealthController hc = GetComponent<HealthController>();
         hc.onDeath += HandleDeath;
-        hc.customDeath = true;
+        hc.CustomDeath = true;
     }
     protected override void Update()
     {
         base.Update();
-        if (!recentlyHitBySpear && !isDead)
-        {
+
+        if (!recentlyHitBySpear && !IsDead)
             HandleAttackAI();
-        }
     }
     public void HandleAttackAI()
     {
         bool tempInCombat = false;
+
         EntityController closestEntity = FindNearestTarget(this);
-        if (closestEntity != null && closestEntity.gameObject != currentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= sightRange)
+
+        if (closestEntity != null && closestEntity.gameObject != CurrentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= SightRange)
         {
-            currentTarget = closestEntity.gameObject;
-            if (currentTarget.TryGetComponent(out currentTargetHC))
-            {
+            CurrentTarget = closestEntity.gameObject;
+
+            if (CurrentTarget.TryGetComponent(out currentTargetHC))
                 currentTargetHC.onDeath += ClearTarget;
-            }
         }
-        if (currentTarget == null)
+
+        if (CurrentTarget == null)
         {
-            currentTarget = GameHandler.instance.Hub;
-            if (currentTarget.TryGetComponent(out currentTargetHC))
-            {
+            CurrentTarget = GameHandler.Instance.Hub;
+
+            if (CurrentTarget.TryGetComponent(out currentTargetHC))
                 currentTargetHC.onDeath += ClearTarget;
-            }
         }
-        if (currentTarget != null)
+
+        if (CurrentTarget != null)
         {
-            if (currentTarget.TryGetComponent(out EntityController ec))
+            if (CurrentTarget.TryGetComponent(out EntityController ec))
             {
-                if (ec.isDead)
+                if (ec.IsDead)
                     ClearTarget();
             }
-            tempInCombat = MoveToAttackTarget(currentTarget);
+
+            tempInCombat = MoveToAttackTarget(CurrentTarget);
         }
+
         inCombat = tempInCombat;
     }
 }

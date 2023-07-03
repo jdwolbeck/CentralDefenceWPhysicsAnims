@@ -785,8 +785,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7ccaccd3c212c6419e0e8676fe6cff2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerSquads: []
-  mobSquads: []
+  PlayerSquads: []
+  MobSquads: []
   Hub: {fileID: 1090035050}
 --- !u!1001 &499050779
 PrefabInstance:

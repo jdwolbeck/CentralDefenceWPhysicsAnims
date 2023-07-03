@@ -1,24 +1,26 @@
+using Banspad;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameHandler : MonoBehaviour
 {
-    public static GameHandler instance { get; private set; }
-    public List<SquadController> playerSquads;
-    public List<SquadController> mobSquads;
+    public static GameHandler Instance { get; private set; }
+    public List<SquadController> PlayerSquads;
+    public List<SquadController> MobSquads;
     public GameObject Hub;
+
     private GameObject spearPrefab;
 
     private void Awake()
     {
-        if (instance != null && instance != this)
+        if (Instance != null && Instance != this)
             Destroy(this);
         else
-            instance = this;
+            Instance = this;
 
+        PlayerSquads = new List<SquadController>();
+        MobSquads = new List<SquadController>();
         spearPrefab = Resources.Load("Prefabs/Spear") as GameObject;
-        playerSquads = new List<SquadController>();
-        mobSquads = new List<SquadController>();
     }
     private void Update()
     {
@@ -26,39 +28,43 @@ public class GameHandler : MonoBehaviour
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Vector3 destinationPoint = Vector3.zero;
+
             if(Physics.Raycast(ray, out RaycastHit hit))
-            {
                 destinationPoint = hit.point;
-            }
 
             if (Input.GetKey(KeyCode.LeftShift) && destinationPoint != Vector3.zero)
             {
+                GameObject spear;
+                Rigidbody[] spearRbs;
                 Vector3 spearSpawnPosition = Camera.main.transform.position + (-2 * Camera.main.transform.forward);
                 Quaternion spearRotation = Quaternion.FromToRotation(Vector3.forward, destinationPoint - spearSpawnPosition);
-                GameObject spear = Instantiate(spearPrefab, spearSpawnPosition, spearRotation);
-                spear.GetComponent<SpearController>().damage = 1f;
-                //spear.GetComponentInChildren<Rigidbody>().AddForce(30 * spear.transform.forward, ForceMode.VelocityChange);
-                Rigidbody[] spearRbs = spear.GetComponentsInChildren<Rigidbody>();
+
+                spear = Instantiate(spearPrefab, spearSpawnPosition, spearRotation);
+
+                spear.GetComponent<SpearController>().Damage = 1f;
+                spearRbs = spear.GetComponentsInChildren<Rigidbody>();
+
                 foreach (Rigidbody rb in spearRbs)
-                {
                     rb.AddForce(30 * spear.transform.forward, ForceMode.VelocityChange);
-                }
             }
         }
     }
     public void AddSquadToList(SquadController activeSquad, EntityType squadType)
     {
+        bool squadAccountedFor = false;
+
         if (activeSquad == null || squadType >= EntityType.EntityCount)
         {
-            Debug.Log("AddSquadToList: an invalid squad was passed in.");
+            Logging.Log("AddSquadToList: an invalid squad was passed in.", true);
+
             return;
         }
-        bool squadAccountedFor = false;
+
         switch (squadType)
         {
             case EntityType.Hero:
             case EntityType.Mercenary:
-                foreach (SquadController pSquad in playerSquads)
+                foreach (SquadController pSquad in PlayerSquads)
                 {
                     if (pSquad == activeSquad)
                     {
@@ -66,11 +72,13 @@ public class GameHandler : MonoBehaviour
                         break;
                     }
                 }
+
                 if (!squadAccountedFor)
-                    playerSquads.Add(activeSquad);
+                    PlayerSquads.Add(activeSquad);
+
                 break;
             case EntityType.Mob:
-                foreach (SquadController mSquad in mobSquads)
+                foreach (SquadController mSquad in MobSquads)
                 {
                     if (mSquad == activeSquad)
                     {
@@ -78,8 +86,10 @@ public class GameHandler : MonoBehaviour
                         break;
                     }
                 }
+
                 if (!squadAccountedFor)
-                    mobSquads.Add(activeSquad);
+                    MobSquads.Add(activeSquad);
+
                 break;
         }
     }

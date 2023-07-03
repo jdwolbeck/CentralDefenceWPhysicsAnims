@@ -5,37 +5,37 @@ using UnityEngine.AI;
 
 public class CollisionCheck : MonoBehaviour
 {
-    [SerializeField]
-    private SpearController spearController;
+    [SerializeField] private SpearController spearController;
+
     private Rigidbody rb;
-    Vector3 velocityBeforeCollision;
-    Vector3 spearPositionBeforeCollision;
-    Quaternion spearRotationBeforeCollision;
-    Transform parentGO;
-    private void Start()
+    private Transform parentTransform;
+    private Vector3 velocityBeforeCollision;
+    private Vector3 spearPositionBeforeCollision;
+    private Quaternion spearRotationBeforeCollision;
+
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        parentTransform = transform;
         velocityBeforeCollision = Vector3.zero;
         spearPositionBeforeCollision = Vector3.zero;
         spearRotationBeforeCollision = Quaternion.identity;
-        parentGO = transform;
-        while (parentGO.parent != null)
-        {
-            parentGO = parentGO.parent;
-        }
+
+        while (parentTransform.parent != null)
+            parentTransform = parentTransform.parent;
     }
     private void FixedUpdate()
     {
         velocityBeforeCollision = rb.velocity;
-        spearPositionBeforeCollision = parentGO.position;
-        spearRotationBeforeCollision = parentGO.rotation;
+        spearPositionBeforeCollision = parentTransform.position;
+        spearRotationBeforeCollision = parentTransform.rotation;
     }
-
     private void OnCollisionEnter(Collision collision)
     {
-        //Debug.Log("OnCollisionEntered SPEAR...");
         if (collision == null)
             return;
+
         spearController.CollidedWithObject(collision, velocityBeforeCollision, spearPositionBeforeCollision, spearRotationBeforeCollision);
     }
 }

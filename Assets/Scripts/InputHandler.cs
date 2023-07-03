@@ -1,23 +1,20 @@
 using Banspad.Managers;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InputHandler : MonoBehaviour
 {
-    public static InputHandler instance { get; private set; }
+    public static InputHandler Instance { get; private set; }
+    
     private void Awake()
     {
-        if (instance != null && instance != this)
+        if (Instance != null && Instance != this)
             Destroy(this);
         else
-            instance = this;
+            Instance = this;
     }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.I))
-        {
             UiManager.Instance.ToggleInventory();
-        }
     }
 }

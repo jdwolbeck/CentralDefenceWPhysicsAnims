@@ -5,46 +5,50 @@ using UnityEngine;
 
 public struct Wave
 {
-    public int numMobs;
-    public float intensity;
+    public int NumMobs;
+    public float Intensity;
 }
 public class WaveHandler : MonoBehaviour
 {
-    public static WaveHandler instance { get; private set; }
+    public static WaveHandler Instance { get; private set; }
     public GameObject MobFolder;
     public TMP_Text WaveTextBox;
-    [SerializeField] private List<Wave> waves = new List<Wave>();
-    [SerializeField] private List<GameObject> currentMobs = new List<GameObject>();
+
+    [SerializeField] private List<Wave> waves;
+    [SerializeField] private List<GameObject> currentMobs;
+
     private GameObject mobPrefab;
     private GameObject squadPrefab;
     private SquadController mobSquad;
     private int waveIndex;
     private bool currentWaveInitialized;
-    private float spawnRadius;
     private float startOfWave;
+
+    private const float SPAWN_RADIUS = 50f;
+    private const float WAVE_COUNT = 10000;
 
     private void Awake()
     {
-        if (instance != null && instance != this)
+        if (Instance != null && Instance != this)
             Destroy(this);
         else
-            instance = this;
-    }
-    void Start()
-    {
-        for (int i = 1; i < 10000; i++)
-        {
-            Wave wave = new Wave();
-            wave.numMobs = i;
-            wave.intensity = i;
-            waves.Add(wave);
-        }
+            Instance = this;
+
+        waves = new List<Wave>();
+        currentMobs = new List<GameObject>();
         mobPrefab = Resources.Load("Prefabs/Mob") as GameObject;
         squadPrefab = Resources.Load("Prefabs/Squad") as GameObject;
         currentWaveInitialized = false;
-        spawnRadius = 50f;
+
+        for (int waveIndex = 15; waveIndex < WAVE_COUNT; waveIndex++)
+        {
+            Wave wave = new Wave();
+            wave.NumMobs = waveIndex;
+            wave.Intensity = waveIndex;
+            waves.Add(wave);
+        }
     }
-    void Update()
+    private void Update()
     {
         if (!currentWaveInitialized)
             InitializeWave();
@@ -61,6 +65,7 @@ public class WaveHandler : MonoBehaviour
                 return true;
             }    
         }
+
         return false;
     }
     private void InitializeWave()
@@ -70,19 +75,23 @@ public class WaveHandler : MonoBehaviour
             WaveTextBox.text = "GAME OVER";
             return;
         }
+
         if (mobSquad == null)
         {
             GameObject squad = Instantiate(squadPrefab, MobFolder.transform);
             mobSquad = squad.GetComponent<SquadController>();
         }
-        // Spawn all of the mobs and store them in our currentMobss list
-        for (int i = 0; i < waves[waveIndex].numMobs; i++)
+
+        // Spawn all of the mobs and store them in our currentMobs list
+        for (int i = 0; i < waves[waveIndex].NumMobs; i++)
         {
-            Vector3 spawnPosition = GetSpawnPosition(Random.Range(-spawnRadius, spawnRadius), Random.Range(0, 2));
+            Vector3 spawnPosition = GetSpawnPosition(Random.Range(-SPAWN_RADIUS, SPAWN_RADIUS), Random.Range(0, 2));
             GameObject mob = Instantiate(mobPrefab, spawnPosition, Quaternion.LookRotation(Vector3.zero - spawnPosition));
+
             mob.transform.SetParent(mobSquad.transform);
             currentMobs.Add(mob);
         }
+
         waveIndex++;
         WaveTextBox.text = "Wave: " + waveIndex;
         currentWaveInitialized = true;
@@ -91,24 +100,18 @@ public class WaveHandler : MonoBehaviour
     private void HandleWaveLogic()
     {
         if (currentMobs.Count == 0)
-        {
             currentWaveInitialized = false;
-        }
     }
     private Vector3 GetSpawnPosition(float spawnXPosition, int spawnUpOrDown)
     {
         // Circle Equation: (X - H)^2 + (Y - K)^2 = r^2  ** H & K are both 0
         Vector2 spawnPoint = new Vector2(spawnXPosition, 0);
+
         if (spawnUpOrDown == 1)
-        {
-            // Positive direction requested
-            spawnPoint.y = Mathf.Sqrt(spawnRadius*spawnRadius - spawnXPosition*spawnXPosition);
-        }
+            spawnPoint.y = Mathf.Sqrt(SPAWN_RADIUS*SPAWN_RADIUS - spawnXPosition*spawnXPosition); // Positive direction requested
         else
-        {
-            // Negative direction requested
-            spawnPoint.y = -Mathf.Sqrt(spawnRadius * spawnRadius - spawnXPosition * spawnXPosition);
-        }
+            spawnPoint.y = -Mathf.Sqrt(SPAWN_RADIUS * SPAWN_RADIUS - spawnXPosition * spawnXPosition); // Negative direction requested
+
         return new Vector3(spawnPoint.x, 0, spawnPoint.y);
     }
 }

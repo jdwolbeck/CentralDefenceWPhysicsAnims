@@ -94,9 +94,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d09c3cf7cf1629479220fbc9233f760, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HealthBar: {fileID: 4525952308734487632}
   TotalHealth: 250
-  customDeath: 0
+  CustomDeath: 0
+  HealthBar: {fileID: 4525952308734487632}
 --- !u!114 &-35518617402759799
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110,14 +110,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Hips: {fileID: 6456259610830981250}
-  isDead: 0
-  entityType: 1
-  sightRange: 7
-  attackRange: 1.5
-  damage: 2
-  attackSpeed: 1
-  currentTarget: {fileID: 0}
-  randomID: 0
+  CurrentTarget: {fileID: 0}
+  EntityType: 1
+  RandomID: 0
+  IsDead: 0
+  Damage: 2
+  SightRange: 8
+  AttackRange: 1.5
+  AttackSpeed: 1.5
 --- !u!208 &2685686747214268496
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -132,7 +132,7 @@ NavMeshObstacle:
   m_MoveThreshold: 0.1
   m_Carve: 0
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
   m_TimeToStationary: 0.5
 --- !u!1 &6456259609604321710
 GameObject:
@@ -518,7 +518,6 @@ GameObject:
   - component: {fileID: 6456259609772080596}
   - component: {fileID: 6456259609772080595}
   - component: {fileID: 6456259609772080594}
-  - component: {fileID: 6456259609772080593}
   m_Layer: 0
   m_Name: UpperArm.L
   m_TagString: Untagged
@@ -638,19 +637,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259609772080593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259609772080599}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259609832806255
 GameObject:
   m_ObjectHideFlags: 0
@@ -695,7 +681,6 @@ GameObject:
   - component: {fileID: 6456259609922743643}
   - component: {fileID: 6456259609922743642}
   - component: {fileID: 6456259609922743645}
-  - component: {fileID: 6456259609922743640}
   m_Layer: 0
   m_Name: LowerLeg.L
   m_TagString: Untagged
@@ -815,19 +800,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259609922743640
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259609922743646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259609975048288
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,7 +812,6 @@ GameObject:
   - component: {fileID: 6456259609975048301}
   - component: {fileID: 6456259609975048300}
   - component: {fileID: 6456259609975048303}
-  - component: {fileID: 6456259609975048298}
   m_Layer: 0
   m_Name: LowerLeg.R
   m_TagString: Untagged
@@ -960,19 +931,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259609975048298
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259609975048288}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259609990418027
 GameObject:
   m_ObjectHideFlags: 0
@@ -1048,7 +1006,6 @@ GameObject:
   - component: {fileID: 6456259610033336000}
   - component: {fileID: 6456259610033336015}
   - component: {fileID: 6456259610033336014}
-  - component: {fileID: 6456259610033336013}
   m_Layer: 0
   m_Name: Chest
   m_TagString: Untagged
@@ -1168,19 +1125,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259610033336013
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259610033336003}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259610098109243
 GameObject:
   m_ObjectHideFlags: 0
@@ -1259,7 +1203,6 @@ GameObject:
   - component: {fileID: 6456259610123137799}
   - component: {fileID: 6456259610123137794}
   - component: {fileID: 6456259610123137797}
-  - component: {fileID: 6456259610123137792}
   m_Layer: 0
   m_Name: UpperLeg.R
   m_TagString: Untagged
@@ -1379,19 +1322,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259610123137792
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259610123137798}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259610286127981
 GameObject:
   m_ObjectHideFlags: 0
@@ -1859,7 +1789,6 @@ GameObject:
   - component: {fileID: 6456259610830981262}
   - component: {fileID: 6456259610830981251}
   - component: {fileID: 6456259610830981249}
-  - component: {fileID: 6456259610830981263}
   m_Layer: 0
   m_Name: Hips
   m_TagString: Untagged
@@ -1933,19 +1862,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.0051926845, y: 0.005252577, z: 0.003272554}
   m_Center: {x: 0.000008111121, y: 0.0022928787, z: -0.00038576103}
---- !u!114 &6456259610830981263
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259610830981250}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259610853599565
 GameObject:
   m_ObjectHideFlags: 0
@@ -1990,7 +1906,6 @@ GameObject:
   - component: {fileID: 6456259611039257921}
   - component: {fileID: 6456259611039257932}
   - component: {fileID: 6456259611039257935}
-  - component: {fileID: 6456259611039257930}
   m_Layer: 0
   m_Name: UpperLeg.L
   m_TagString: Untagged
@@ -2110,19 +2025,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259611039257930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259611039257920}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259611155421680
 GameObject:
   m_ObjectHideFlags: 0
@@ -2315,7 +2217,6 @@ GameObject:
   - component: {fileID: 6456259611254375834}
   - component: {fileID: 6456259611254375833}
   - component: {fileID: 6456259611254375832}
-  - component: {fileID: 6456259611254375815}
   m_Layer: 0
   m_Name: UpperArm.R
   m_TagString: Untagged
@@ -2435,19 +2336,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259611254375815
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259611254375837}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259611276884225
 GameObject:
   m_ObjectHideFlags: 0
@@ -2492,7 +2380,6 @@ GameObject:
   - component: {fileID: 6456259611349478274}
   - component: {fileID: 6456259611349478277}
   - component: {fileID: 6456259611349478276}
-  - component: {fileID: 6456259611349478275}
   m_Layer: 0
   m_Name: LowerArm.L
   m_TagString: Untagged
@@ -2612,19 +2499,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259611349478275
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259611349478297}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259611352453468
 GameObject:
   m_ObjectHideFlags: 0
@@ -2939,7 +2813,6 @@ GameObject:
   - component: {fileID: 6456259611513928078}
   - component: {fileID: 6456259611513928065}
   - component: {fileID: 6456259611513928064}
-  - component: {fileID: 6456259611513928079}
   m_Layer: 0
   m_Name: Head
   m_TagString: Untagged
@@ -3057,19 +2930,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259611513928079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259611513928069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259611569776485
 GameObject:
   m_ObjectHideFlags: 0
@@ -3082,7 +2942,6 @@ GameObject:
   - component: {fileID: 6456259611569776494}
   - component: {fileID: 6456259611569776481}
   - component: {fileID: 6456259611569776480}
-  - component: {fileID: 6456259611569776495}
   m_Layer: 0
   m_Name: LowerArm.R
   m_TagString: Untagged
@@ -3202,19 +3061,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6456259611569776495
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6456259611569776485}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c33eac458f90c204993981e31d8d1f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityController: {fileID: 0}
 --- !u!1 &6456259611629124440
 GameObject:
   m_ObjectHideFlags: 0

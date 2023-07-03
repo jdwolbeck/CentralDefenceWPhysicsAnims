@@ -4,28 +4,30 @@ using UnityEngine;
 
 public class SquadPatrollingState : SquadState
 {
-    private float patrolRadius = Random.Range(8f, 12f);
+    private readonly float patrolRadius = Random.Range(8f, 12f);
 
     public override SquadState NextSquadState(SquadController squad)
     {
         foreach (EntityController entity in squad.SquadEntities)
         {
             if (!entity.HasNavAgentDestination() && Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) <= squad.SquadRadius)
-            {
                 return this;
-            }
         }
+
         return new SquadGroupingState();
     }
     public override void HandleStateLogic(SquadController squad)
     {
-        if (squad.SquadLeader != null && squad.SquadLeader.currentTarget == null && !squad.SquadLeader.HasNavAgentDestination() && GameHandler.instance.Hub != null)
+        if (squad.SquadLeader != null && squad.SquadLeader.CurrentTarget == null && !squad.SquadLeader.HasNavAgentDestination() && GameHandler.Instance.Hub != null)
         {
             // Determine positioning of our SquadLeader
-            Vector3 locationRelativeToNexus = squad.SquadLeader.transform.position - GameHandler.instance.Hub.transform.position;
+            Vector3 locationRelativeToNexus = squad.SquadLeader.transform.position - GameHandler.Instance.Hub.transform.position;
+            Vector3 nextPatrolDestination;
             Vector2 squadQuadrantRelToNexus = new Vector2(locationRelativeToNexus.x > 0 ? 1 : -1, locationRelativeToNexus.z > 0 ? 1 : -1);
-            // Find random position in the next quadrant of the nexus
             Vector2 squadsNextQuadrant;
+            float randomizedDestination = Random.Range(0, patrolRadius);
+
+            // Find random position in the next quadrant of the nexus
             if (squadQuadrantRelToNexus == new Vector2(1, 1))
                 squadsNextQuadrant = new Vector2(1, -1);
             else if (squadQuadrantRelToNexus == new Vector2(1, -1))
@@ -36,10 +38,8 @@ public class SquadPatrollingState : SquadState
                 squadsNextQuadrant = new Vector2(1, 1);
 
             // Set destination to this quadrant
-            float randomizedDestination = Random.Range(0, patrolRadius);
             randomizedDestination *= squadsNextQuadrant.x;
-            Vector3 nextPatrolDestination =
-                new Vector3(randomizedDestination, 0, squadsNextQuadrant.y * Mathf.Sqrt((patrolRadius * patrolRadius) - (randomizedDestination * randomizedDestination)));
+            nextPatrolDestination = new Vector3(randomizedDestination, 0, squadsNextQuadrant.y * Mathf.Sqrt((patrolRadius * patrolRadius) - (randomizedDestination * randomizedDestination)));
 
             foreach (EntityController entity in squad.SquadEntities)
             {

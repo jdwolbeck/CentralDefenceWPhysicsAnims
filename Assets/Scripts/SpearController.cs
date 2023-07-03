@@ -1,31 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
+using Banspad;
 using UnityEngine;
-using UnityEngine.AI;
-using static UnityEditor.Progress;
 
 public class SpearController : MonoBehaviour
 {
-    public float totalMass;
-    public float damage;
+    public float TotalMass;
+    public float Damage;
+
     private float timeSinceInstantiation;
     private bool hasDoneDamage;
-    void Start()
+
+    private void Start()
     {
-        timeSinceInstantiation = 0f;
         foreach(Rigidbody rb in GetComponentsInChildren<Rigidbody>())
-        {
-            totalMass += rb.mass;
-        }
+            TotalMass += rb.mass;
+
+        timeSinceInstantiation = 0f;
         hasDoneDamage = false;
     }
-    void Update()
+    private void Update()
     {
         timeSinceInstantiation += Time.deltaTime;
+
         if (timeSinceInstantiation >= 30f)
-        {
             Destroy(gameObject);
-        }
+
         //Rigidbody rb = GetComponentInChildren<Rigidbody>();
         //Show velocity tangent of flight// Debug.DrawLine(rb.transform.position, rb.transform.position + rb.velocity, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
     }
@@ -36,38 +34,38 @@ public class SpearController : MonoBehaviour
             Debug.Log("We received a null collision!");
             return;
         }
-        //Debug.Log("Collided with object " + collision.gameObject.ToString());
+
         // Get the parent game object of whatever we hit
         GameObject parentGO = collision.gameObject;
         bool isEntity = false;
+
         if (parentGO.TryGetComponent(out EntityController tmp2))
-        {
-            //Debug.Log("Found entity controller on entity we hit with spear.");
             isEntity = true;
-        }
+
         while (parentGO.transform.parent != null && !isEntity)
         {
             parentGO = parentGO.transform.parent.gameObject;
+
             if (parentGO.TryGetComponent(out EntityController tmp))
-            {
-                //Debug.Log("Found entity controller on entity we hit with spear.");
                 isEntity = true;
-            }
         }
 
-        //Debug.Log("Parent object " + parentGO.ToString() + " isEntity? " + isEntity);
         if (isEntity)
         { 
             RemoveRigidBodies();
+
             // Set this spear to be a child of the entity it hit
             transform.parent = collision.transform;
+
             if (parentGO.TryGetComponent(out EntityController entityController))
             {
                 entityController.HitBySpear(gameObject, velocityBeforeCollision, collision.gameObject);
+
                 if (!hasDoneDamage)
                 {
-                    Debug.Log("SpearController do damage to " + parentGO.ToString());
-                    parentGO.GetComponent<HealthController>().TakeDamage(gameObject, damage);
+                    Logging.Log("SpearController do damage to " + parentGO.ToString(), false);
+
+                    parentGO.GetComponent<HealthController>().TakeDamage(gameObject, Damage);
                     hasDoneDamage = true;
                 }
             }
@@ -75,48 +73,35 @@ public class SpearController : MonoBehaviour
         else
         { // Some other object other than a entity was hit, just stick based on angle
             float angleOfCollision = Vector3.Angle(collision.GetContact(0).normal, velocityBeforeCollision);
+
             //Debug.DrawRay(collision.GetContact(0).point, collision.GetContact(0).normal, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
             //Debug.Log("Angle of collision: " + angleOfCollision);
 
-            if (angleOfCollision >= 105f || angleOfCollision <= 75f)
-            { // Good angle
+            if (angleOfCollision >= 105f || angleOfCollision <= 75f) // Good angle
                 RemoveRigidBodies();
-            }
-            else
-            {
-                //Debug.Log("Spear did not stick with an angle of " + angleOfCollision);
-            }
-        }
-    }
-    private void EnableKinematics()
-    {
-        Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
-        foreach (Rigidbody rb in rbs)
-        {
-            rb.isKinematic = true;
         }
     }
     private void RemoveRigidBodies()
     {
         Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
+
         foreach (Rigidbody rb in rbs)
         {
             if (rb.gameObject.TryGetComponent(out FixedJoint fixedJoint))
                 Destroy(fixedJoint);
+
             BoxCollider boxCollider = rb.GetComponentInChildren<BoxCollider>();
             if (boxCollider != null)
                 Destroy(boxCollider);
+
             CapsuleCollider capsuleCollider = rb.GetComponentInChildren<CapsuleCollider>();
             if (capsuleCollider != null)    
                 Destroy(capsuleCollider);
+
             CollisionCheck[] spearPartsCollChecks = rb.gameObject.GetComponentsInChildren<CollisionCheck>();
-            if (spearPartsCollChecks.Length > 0)
-            {
-                foreach (CollisionCheck collisionCheck in spearPartsCollChecks)
-                {
-                    Destroy(collisionCheck);
-                }
-            }
+            foreach (CollisionCheck collisionCheck in spearPartsCollChecks)
+                Destroy(collisionCheck);
+
             rb.isKinematic = true;
             Destroy(rb);
         }
