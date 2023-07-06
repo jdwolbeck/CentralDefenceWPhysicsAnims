@@ -8,7 +8,7 @@ public class SquadGroupingState : SquadState
     {
         foreach (EntityController entity in squad.SquadEntities)
         {
-            if (entity.HasNavAgentDestination() || Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.SquadRadius)
+            if (Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.SquadRadius)
             {
                 return this;
             }
@@ -29,11 +29,10 @@ public class SquadGroupingState : SquadState
         if (entity == squad.SquadLeader || entity.CurrentTarget != null)
             return;
 
-        if (Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.SquadRadius)
+        if (Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.SquadRadius && !entity.HasNavAgentDestination())
         {
-            float randomizedDistance = Random.Range(0.5f, squad.SquadRadius);
-
-            entity.SetNavAgentDestination(squad.SquadLeader.transform.position, randomizedDistance, 0.8f);
+            float randomizedDistance = Random.Range(1.25f, squad.SquadRadius);
+            entity.SetNavAgentDestination(squad.SquadLeader.transform.position, randomizedDistance, 0.5f);
         }
     }
 }

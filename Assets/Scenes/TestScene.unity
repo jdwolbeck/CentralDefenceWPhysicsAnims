@@ -808,6 +808,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mercenary (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172863, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: avoidancePriority
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -881,6 +889,14 @@ PrefabInstance:
     - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_Name
       value: Mercenary (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172863, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: avoidancePriority
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_RootOrder
@@ -1055,6 +1071,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mercenary (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -1112,6 +1132,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2043955528}
     m_Modifications:
+    - target: {fileID: -35518617402759799, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
+      propertyPath: AttackSpeed
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2100581193686161522, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1123,6 +1147,10 @@ PrefabInstance:
     - target: {fileID: 6149757896793172848, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
       propertyPath: m_Name
       value: Hero
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172863, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
+      propertyPath: m_ObstacleAvoidanceType
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
       propertyPath: m_RootOrder
@@ -6405,6 +6433,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mercenary
       objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172863, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: avoidancePriority
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -6613,6 +6649,14 @@ PrefabInstance:
     - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_Name
       value: Mercenary (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172863, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: avoidancePriority
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_RootOrder
@@ -6861,6 +6905,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mercenary
       objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -7009,6 +7057,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mercenary (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172863, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
+      propertyPath: avoidancePriority
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 8d6dac03851682441a56ed42697ccdd6, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -7082,6 +7138,10 @@ PrefabInstance:
     - target: {fileID: 6149757896793172848, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
       propertyPath: m_Name
       value: Hero
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149757896793172848, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6778907643763421642, guid: 5b619bfabbb6d0a458e72d5752846ca5, type: 3}
       propertyPath: m_RootOrder

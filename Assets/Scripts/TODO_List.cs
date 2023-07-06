@@ -42,6 +42,8 @@ public class TODO_List
      *  - Full set of diablo-like equiment, charm inventory, skill tree, activatable skills, attributes
      *  - Comes with squad of similar but weaker units
      *  - All squad units will have the same set of equipment but can be upgraded (similar to d2 mercenaries)
+     *  - Many different types of heros that can be recuited from some tavern type area (shitty 1-3 star heros can be bought and if they die in the battle field they are dead for good -- possibly human vs immortals)
+     *  - Each hero (no matter the tier) will come with a squad of similar units, a hero skillset, and items for hero (diablo-like items).
      *  
      * Loot:
      *  - Diablo-like items and stats (Helmet, chest, legs, boots, gloves, ring/ammy, charm inventory, runes, gems)
@@ -132,18 +134,11 @@ public class TODO_List
     /*
      * Things to do next:
      * Gameplay options:
+     *  - Continue building up NavAgent resillience to getting stuck behind people.
+     *      - Implement some type of StarCraft system where units will path left and right after a certain amount of time not moving towards goal.
+     *      - Could try playing with priorities of the Agents to have some bully the others
      *  - Work on only building up a dungeon/zone first (Goblin village for current scene)
-     *    - Squad based AI
-     *      - Option1
-     *       - Each squad member must communicate with daddy hero whow ill be a sort of "SquadManager"
-     *       - All squad managers and enemy scripts should also speak with eachother with some type of standard message that will define their current location/team (at a minimum)
-     *      - Option2 (preferred)
-     *       - Each entity on scene will use its UnitManager script to communicate with the Gamehandler, which will contain a list of all entities and a list of their most up-to-date location/health information.
-     *       - All entities should be able to reference the Gamehandlers list to determine closest enemy to them or priorty targeting.
      *    - Overarching AI for defending Nexus/other Hero or for attacking Goblin base.
      *    - Put in placeholder Goblin stronghold and develop system for how the boss will be spawned
-     *  - Combat system will be more of a combat octogon with elements (fire, water, earth, etc, shadow, light, physical)
-     *  - Many different types of heros that can be recuited from some tavern type area (shitty 1-3 star heros can be bought and if they die in the battle field they are dead for good -- possibly human vs immortals)
-     *  - Each hero (no matter the tier) will come with a squad of similar units, a hero skillset, and items for hero (diablo-like items).
      */
 }

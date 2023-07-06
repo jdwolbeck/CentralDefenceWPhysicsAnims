@@ -72,7 +72,7 @@ NavMeshAgent:
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8
-  avoidancePriority: 50
+  avoidancePriority: 49
   m_AngularSpeed: 120
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
@@ -81,7 +81,7 @@ NavMeshAgent:
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  m_ObstacleAvoidanceType: 1
 --- !u!114 &8426747879658642880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,15 +109,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52611913705fd83468c98a208b0a1ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Hips: {fileID: 6456259610830981250}
+  Debug_RemainingDistance: 0
+  Debug_DistanceToHero: 0
+  TimeToDamageEnemy: []
   CurrentTarget: {fileID: 0}
+  Hips: {fileID: 6456259610830981250}
+  CurrentTargetHC: {fileID: 0}
+  EntityHC: {fileID: 0}
+  NavAgent: {fileID: 0}
+  NavObstacle: {fileID: 0}
   EntityType: 0
-  RandomID: 0
-  IsDead: 0
+  EntityStateString: 
   Damage: 3
   SightRange: 8
   AttackRange: 1.5
-  AttackSpeed: 1.5
+  AttackSpeed: 1
+  NavDefaultSpeed: 0
+  AnimationBoolInCombat: 0
+  InAttackAnimation: 0
+  RandomID: 0
 --- !u!208 &1108978682841934084
 NavMeshObstacle:
   m_ObjectHideFlags: 0

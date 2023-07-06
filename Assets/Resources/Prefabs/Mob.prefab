@@ -109,15 +109,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b5697a0f267d4240adc37744530029c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Hips: {fileID: 6456259610830981250}
+  TimeToDamageEnemy: []
   CurrentTarget: {fileID: 0}
+  Hips: {fileID: 6456259610830981250}
+  CurrentTargetHC: {fileID: 0}
+  EntityHC: {fileID: 0}
+  NavAgent: {fileID: 0}
+  NavObstacle: {fileID: 0}
   EntityType: 2
-  RandomID: 0
-  IsDead: 0
+  EntityStateString: 
   Damage: 1
   SightRange: 12
   AttackRange: 1.5
-  AttackSpeed: 1.5
+  AttackSpeed: 1
+  NavDefaultSpeed: 0
+  AnimationBoolInCombat: 0
+  InAttackAnimation: 0
+  RandomID: 0
 --- !u!208 &5955215780425198785
 NavMeshObstacle:
   m_ObjectHideFlags: 0

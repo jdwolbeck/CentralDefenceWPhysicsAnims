@@ -11,16 +11,16 @@ public class HeroController : EntityController
     {
         base.Awake();
 
-        HealthController hc = GetComponent<HealthController>();
+        /*HealthController hc = GetComponent<HealthController>();
         hc.onDeath += HandleDeath;
-        hc.CustomDeath = true;
+        hc.CustomDeath = true;*/
     }
     protected override void Update()
     {
         base.Update();
 
-        if (!recentlyHitBySpear && !IsDead)
-            HandleDefendAI();
+        //if (!recentlyHitBySpear && CurrentState is not EntityDeadState)
+            //HandleDefendAI();
     }
     public void HandleDefendAI()
     {
@@ -33,19 +33,19 @@ public class HeroController : EntityController
         }
         if (CurrentTarget != null)
         {
-            if (CurrentTarget.GetComponent<EntityController>().IsDead)
+            if (CurrentTarget.GetComponent<EntityController>().CurrentState is EntityDeadState)
                 ClearTarget();
 
-            inCombat = MoveToAttackTarget(CurrentTarget);
+            AnimationBoolInCombat = MoveToAttackTarget(CurrentTarget);
         }
         else
         {
-            inCombat = false;
+            AnimationBoolInCombat = false;
 
-            if (!navAgent.enabled)
+            if (!NavAgent.enabled)
             {
-                navObstacle.enabled = false;
-                navAgent.enabled = true;
+                NavObstacle.enabled = false;
+                NavAgent.enabled = true;
             }
 
             LookForTarget();
@@ -68,7 +68,7 @@ public class HeroController : EntityController
             // Do an initial check if current GO is toplevel of Mob/Hero entity.
             if (parentGO.TryGetComponent(out uc))
             {
-                if (uc.EntityType == EntityType.Mob && !uc.IsDead)
+                if (uc.EntityType == EntityType.Mob && uc.CurrentState is not EntityDeadState)
                     topLevelGO = true;
             }
 
@@ -78,7 +78,7 @@ public class HeroController : EntityController
                 parentGO = parentGO.transform.parent.gameObject;
                 if (parentGO.TryGetComponent(out uc))
                 {
-                    if (uc.EntityType == EntityType.Mob && !uc.IsDead)
+                    if (uc.EntityType == EntityType.Mob && uc.CurrentState is not EntityDeadState)
                         topLevelGO = true;
                 }
             }

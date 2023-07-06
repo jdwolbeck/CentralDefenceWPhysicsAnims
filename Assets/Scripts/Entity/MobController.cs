@@ -11,16 +11,17 @@ public class MobController : EntityController
     {
         base.Awake();
 
-        HealthController hc = GetComponent<HealthController>();
+        /*HealthController hc = GetComponent<HealthController>();
         hc.onDeath += HandleDeath;
-        hc.CustomDeath = true;
+        hc.CustomDeath = true; */
+        CurrentTarget = GameHandler.Instance.Hub;
     }
     protected override void Update()
     {
         base.Update();
 
-        if (!recentlyHitBySpear && !IsDead)
-            HandleAttackAI();
+        //if (!recentlyHitBySpear && CurrentState is not EntityDeadState)
+           // HandleAttackAI();
     }
     public void HandleAttackAI()
     {
@@ -32,29 +33,29 @@ public class MobController : EntityController
         {
             CurrentTarget = closestEntity.gameObject;
 
-            if (CurrentTarget.TryGetComponent(out currentTargetHC))
-                currentTargetHC.onDeath += ClearTarget;
+            if (CurrentTarget.TryGetComponent(out CurrentTargetHC))
+                CurrentTargetHC.onDeath += ClearTarget;
         }
 
         if (CurrentTarget == null)
         {
             CurrentTarget = GameHandler.Instance.Hub;
 
-            if (CurrentTarget.TryGetComponent(out currentTargetHC))
-                currentTargetHC.onDeath += ClearTarget;
+            if (CurrentTarget.TryGetComponent(out CurrentTargetHC))
+                CurrentTargetHC.onDeath += ClearTarget;
         }
 
         if (CurrentTarget != null)
         {
             if (CurrentTarget.TryGetComponent(out EntityController ec))
             {
-                if (ec.IsDead)
+                if (ec.CurrentState is EntityDeadState)
                     ClearTarget();
             }
 
             tempInCombat = MoveToAttackTarget(CurrentTarget);
         }
 
-        inCombat = tempInCombat;
+        AnimationBoolInCombat = tempInCombat;
     }
 }

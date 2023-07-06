@@ -49,7 +49,7 @@ public class SquadController : MonoBehaviour
     }
     public void AddEntityToSquad(EntityController entity)
     {
-        if (entity.IsDead)
+        if (entity.CurrentState is EntityDeadState)
             return;
 
         foreach (EntityController e in SquadEntities)
