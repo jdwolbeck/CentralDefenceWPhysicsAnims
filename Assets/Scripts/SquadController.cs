@@ -60,6 +60,7 @@ public class SquadController : MonoBehaviour
 
         SquadEntities.Add(entity);
         SquadEntityStatuses.Add(GetSquadEntityStateInfo(entity));
+        entity.Squad = this;
     }
 
     public void RemoveEntityFromSquad(EntityController entity)

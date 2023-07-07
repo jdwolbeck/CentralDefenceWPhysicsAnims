@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EntityState
@@ -11,18 +12,14 @@ public class EntityState
     public virtual void HandleStateLogic(EntityController entityController)
     {
         HandleEnemyProximityChecks(entityController);
+        HandleDefendingSquad(entityController);
     }
     private void HandleEnemyProximityChecks(EntityController entityController)
     {
         EntityController closestEntity = entityController.FindNearestTarget(entityController);
 
         if (CheckIfNewTargetRequired(entityController, closestEntity))
-        {
-            entityController.CurrentTarget = closestEntity.gameObject;
-
-            if (entityController.CurrentTarget.TryGetComponent(out HealthController currentTargetHC))
-                currentTargetHC.onDeath += entityController.ClearTarget;
-        }
+            entityController.SetNewTarget(closestEntity);
 
         if (entityController.CurrentTarget != null)
         {
@@ -42,7 +39,7 @@ public class EntityState
             }
 
             if (entityController.EntityType == EntityType.Mob)
-                entityController.CurrentTarget = GameHandler.Instance.Hub;
+                entityController.SetNewTarget(GameHandler.Instance.Hub.GetComponent<DamageableController>());
         }
     }
     private bool CheckIfNewTargetRequired(EntityController entityController, EntityController closestEntity)
@@ -66,5 +63,26 @@ public class EntityState
         }
 
         return true;
+    }
+    public void HandleDefendingSquad(EntityController entityController)
+    {
+        if (entityController.CurrentTarget == null && entityController.Squad != null)
+        {
+            DamageableController closestTarget = null;
+            float distanceToClosestTarget = 999999f;
+            foreach (EntityController entity in entityController.Squad.SquadEntities)
+            {
+                // Find the closest squad member to help if there are no enemies around me
+                if (entity.CurrentTarget != null && Vector3.Distance(entity.CurrentTarget.transform.position, entityController.transform.position) < distanceToClosestTarget)
+                {
+                    closestTarget = entity.CurrentTarget;
+                    distanceToClosestTarget = Vector3.Distance(entity.CurrentTarget.transform.position, entityController.transform.position);
+                }
+            }
+            if (closestTarget != null)
+            {
+                entityController.SetNewTarget(closestTarget);
+            }
+        }
     }
 }

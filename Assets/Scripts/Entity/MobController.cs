@@ -14,7 +14,7 @@ public class MobController : EntityController
         /*HealthController hc = GetComponent<HealthController>();
         hc.onDeath += HandleDeath;
         hc.CustomDeath = true; */
-        CurrentTarget = GameHandler.Instance.Hub;
+        CurrentTarget = GameHandler.Instance.Hub.GetComponent<DamageableController>();
     }
     protected override void Update()
     {
@@ -27,22 +27,18 @@ public class MobController : EntityController
     {
         bool tempInCombat = false;
 
-        EntityController closestEntity = FindNearestTarget(this);
+        DamageableController closestEntity = FindNearestTarget(this);
 
         if (closestEntity != null && closestEntity.gameObject != CurrentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= SightRange)
         {
-            CurrentTarget = closestEntity.gameObject;
+            CurrentTarget = closestEntity;
 
-            if (CurrentTarget.TryGetComponent(out CurrentTargetHC))
-                CurrentTargetHC.onDeath += ClearTarget;
+            SetNewTarget(closestEntity);
         }
 
         if (CurrentTarget == null)
         {
-            CurrentTarget = GameHandler.Instance.Hub;
-
-            if (CurrentTarget.TryGetComponent(out CurrentTargetHC))
-                CurrentTargetHC.onDeath += ClearTarget;
+            SetNewTarget(GameHandler.Instance.Hub.GetComponent<DamageableController>());
         }
 
         if (CurrentTarget != null)

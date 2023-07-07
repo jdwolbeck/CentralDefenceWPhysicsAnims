@@ -29,7 +29,7 @@ public class HeroController : EntityController
             EntityController closestEntity = FindNearestTarget(this);
 
             if (closestEntity != null && closestEntity.gameObject != CurrentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= SightRange)
-                CurrentTarget = closestEntity.gameObject;
+                CurrentTarget = closestEntity;
         }
         if (CurrentTarget != null)
         {
@@ -53,7 +53,7 @@ public class HeroController : EntityController
     }
     public bool LookForTarget()
     {
-        List<GameObject> foundEntities = new List<GameObject>();
+        List<EntityController> foundEntities = new List<EntityController>();
 
         // Utilize physics to create a sphere to check for all colliders within a sight radius
         Collider[] colliders = Physics.OverlapSphere(transform.position, SightRange);
@@ -62,41 +62,40 @@ public class HeroController : EntityController
         {
             // Check for a EntityController script on a given gameObject and their parents.
             GameObject parentGO = collider.gameObject;
-            bool topLevelGO = false;
-            EntityController uc;
+            EntityController entity = null;
 
             // Do an initial check if current GO is toplevel of Mob/Hero entity.
-            if (parentGO.TryGetComponent(out uc))
+            if (parentGO.TryGetComponent(out EntityController tempEntity))
             {
-                if (uc.EntityType == EntityType.Mob && uc.CurrentState is not EntityDeadState)
-                    topLevelGO = true;
+                if (tempEntity.EntityType == EntityType.Mob && tempEntity.CurrentState is not EntityDeadState)
+                    entity = tempEntity;
             }
 
             // Keep checking for EntityController script until we find one or we are at the top level of the heirarchy. 
-            while (parentGO.transform.parent != null && !topLevelGO)
+            while (parentGO.transform.parent != null && entity == null)
             {
                 parentGO = parentGO.transform.parent.gameObject;
-                if (parentGO.TryGetComponent(out uc))
+                if (parentGO.TryGetComponent(out tempEntity))
                 {
-                    if (uc.EntityType == EntityType.Mob && uc.CurrentState is not EntityDeadState)
-                        topLevelGO = true;
+                    if (tempEntity.EntityType == EntityType.Mob && tempEntity.CurrentState is not EntityDeadState)
+                        entity = tempEntity;
                 }
             }
 
             // We found a EntityController attached to a gameObject.
-            if (topLevelGO)
+            if (entity != null)
             {
                 // Add each unique entity into a list
                 bool entityAccountedFor = false;
 
-                foreach (GameObject go in foundEntities)
+                foreach (EntityController tmpEntity in foundEntities)
                 {
-                    if (parentGO == go)
+                    if (entity == tmpEntity)
                         entityAccountedFor = true;
                 }
 
                 if (!entityAccountedFor)
-                    foundEntities.Add(parentGO);
+                    foundEntities.Add(entity);
             }
         }
 

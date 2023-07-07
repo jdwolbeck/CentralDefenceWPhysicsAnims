@@ -133,7 +133,6 @@ public class ItemHandler : MonoBehaviour
     {
         ItemBase testItem = new ItemBase();
         ItemAttribute attribute = new ItemAttribute();
-        ScriptableEquipmentSlotDefaults slotDefaults;
         int attributeCount = 1;
         int randAttribute;
 
@@ -194,10 +193,6 @@ public class ItemHandler : MonoBehaviour
                 testItem.ItemAttributes.Add(attribute);
             }
         }
-
-        slotDefaults = ResourceSystemExtended.Instance.GetEquipmentSlotDefaults((ItemGroupsEnum)testItem.ItemGroup);
-        testItem.SlotWidth = slotDefaults.SlotWidth;
-        testItem.SlotHeight = slotDefaults.SlotHeight;
 
         return testItem;
     }

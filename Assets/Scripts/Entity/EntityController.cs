@@ -10,20 +10,19 @@ public enum EntityType
     Mob,
     EntityCount
 }
-public class EntityController : MonoBehaviour
+public class EntityController : DamageableController
 {
     public float Debug_RemainingDistance = 0f;
     public float Debug_DistanceToHero = 0f;
 
     public List<float> TimeToDamageEnemy;
     public EntityState CurrentState;
-    public GameObject CurrentTarget;
+    public DamageableController CurrentTarget;
     public GameObject Hips;
-    public HealthController CurrentTargetHC;
-    public HealthController EntityHC;
     public NavMeshAgent NavAgent;
     public NavMeshObstacle NavObstacle;
     public EntityItemsExtended Items;
+    public SquadController Squad;
     public EntityType EntityType;
     public string EntityStateString;
     public float Damage;
@@ -44,10 +43,11 @@ public class EntityController : MonoBehaviour
     protected float standUpCooldown;
     protected float timeSinceSpear;
 
-    protected virtual void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         CurrentState = new EntityState();
-        EntityHC = GetComponent<HealthController>();
         animator = GetComponent<Animator>();
         NavAgent = GetComponent<NavMeshAgent>();
         NavDefaultSpeed = NavAgent.speed;
@@ -58,7 +58,7 @@ public class EntityController : MonoBehaviour
         NavObstacle = GetComponent<NavMeshObstacle>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
 
-        RandomID = UnityEngine.Random.Range(0, 100000000);
+        RandomID = Random.Range(0, 100000000);
         TimeToDamageEnemy = new List<float>();
 
         AnimationBoolInCombat = false;
@@ -69,24 +69,14 @@ public class EntityController : MonoBehaviour
 
         foreach (Rigidbody rigidBody in rigidBodies)
             rigidBody.isKinematic = true;
-
-        HealthController hc = GetComponent<HealthController>();
-        hc.onDeath += HandleDeath;
-        hc.CustomDeath = true;
+    }
+    protected virtual void Start()
+    {
+        HealthController.onDeath += HandleDeath;
+        HealthController.CustomDeath = true;
     }
     protected virtual void Update()
     {
-        if (NavAgent.enabled)
-        {
-            Debug_RemainingDistance = NavAgent.remainingDistance;
-            if (TryGetComponent(out SquadController sc))
-            {
-                if (sc.SquadLeader != null)
-                    Debug_DistanceToHero = Vector3.Distance(transform.position, GetComponent<SquadController>().SquadLeader.transform.position);
-            }
-            
-        }
-
         if (recentlyHitBySpear && CurrentState is not EntityDeadState)
         { // Commence stand up sequence.
             if ((timeSinceSpear + standUpCooldown) <= Time.time)
@@ -167,15 +157,14 @@ public class EntityController : MonoBehaviour
 
         return closestEntity;
     }
-    public bool MoveToAttackTarget(GameObject target)
+    public bool MoveToAttackTarget(DamageableController target)
     {
         bool inRangeOfTarget = false;
 
         if (target == null)
             return false;
 
-        if (CurrentTarget != target)
-            CurrentTarget = target;
+        SetNewTarget(target);
 
         if (NavAgent.speed != NavDefaultSpeed)
             NavAgent.speed = NavDefaultSpeed;
@@ -211,7 +200,7 @@ public class EntityController : MonoBehaviour
 
         return inRangeOfTarget;
     }
-    public void Attack(GameObject target)
+    public void Attack(DamageableController target)
     {
         float attackCooldown = 1 / AttackSpeed;
 
@@ -221,40 +210,44 @@ public class EntityController : MonoBehaviour
             return;
         }
 
-        if (target.TryGetComponent(out HealthController healthController))
-        {
-            Quaternion lookOnLook = Quaternion.LookRotation(target.transform.position - transform.position);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookOnLook, Time.deltaTime * 3);
+        Quaternion lookOnLook = Quaternion.LookRotation(target.transform.position - transform.position);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookOnLook, Time.deltaTime * 3);
 
-            if (Time.time > timeSinceLastAttack + attackCooldown)
+        if (Time.time > timeSinceLastAttack + attackCooldown)
+        {
+            if (NavAgent.enabled)
             {
-                if (NavAgent.enabled)
-                {
-                    NavAgent.enabled = false;
-                    NavObstacle.enabled = true;
-                }
-
-                InAttackAnimation = true;
-                TimeToDamageEnemy.Add(Time.time + attackCooldown - 0.2f);
-                CurrentTargetHC = healthController;
-                timeSinceLastAttack = Time.time;
-
-                Logging.Log("Adding a time to attack for " + TimeToDamageEnemy + " at current time " + timeSinceLastAttack, debugEntityController);
+                NavAgent.enabled = false;
+                NavObstacle.enabled = true;
             }
-        }
-        else
-        {
-            Logging.Log("ERROR: Tried to attack something without a healthController: " + target.ToString(), true);
-        }
 
+            InAttackAnimation = true;
+            TimeToDamageEnemy.Add(Time.time + attackCooldown - 0.2f);
+            timeSinceLastAttack = Time.time;
+
+            Logging.Log("Adding a time to attack for " + TimeToDamageEnemy + " at current time " + timeSinceLastAttack, debugEntityController);
+        }
+    }
+    public void SetNewTarget(DamageableController target)
+    {
+        if (target == null || (CurrentTarget != null && CurrentTarget == target))
+            return;
+
+        ClearTarget();
+
+        CurrentTarget = target;
+        CurrentTarget.HealthController.onDeath += ClearTarget;
     }
     public void ClearTarget()
     {
         Logging.Log("Current target died, removing", debugEntityController);
 
-        AnimationBoolInCombat = false;
+        if (CurrentTarget == null)
+            return;
+
+        CurrentTarget.HealthController.onDeath -= ClearTarget;
         CurrentTarget = null;
-        CurrentTargetHC = null;
+        AnimationBoolInCombat = false;
     }
     public void HandleDeath()
     {
@@ -293,14 +286,17 @@ public class EntityController : MonoBehaviour
     }
     public bool HasNavAgentDestination()
     {
-        return NavAgent.remainingDistance - NavAgent.stoppingDistance >= 0.1f;
+        if (NavAgent.enabled)
+            return NavAgent.remainingDistance - NavAgent.stoppingDistance >= 0.1f;
+
+        return false;
     }
     public bool GetEntityStatusinfo(EntityStatusInfo ourStateInfo)
     {
         if (transform.parent != null && transform.parent.gameObject.TryGetComponent(out SquadController squadController))
         {
             ourStateInfo.Position = transform.position;
-            ourStateInfo.Health = GetComponent<HealthController>().CurrentHealth;
+            ourStateInfo.Health = HealthController.CurrentHealth;
 
             return true;
         }

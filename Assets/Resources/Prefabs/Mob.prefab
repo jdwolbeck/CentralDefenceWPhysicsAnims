@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6778907643763421642}
   - component: {fileID: 6149757896793172860}
-  - component: {fileID: 6149757896793172863}
-  - component: {fileID: -6891583473431503637}
   - component: {fileID: 7698422715352520021}
+  - component: {fileID: -6891583473431503637}
+  - component: {fileID: 6149757896793172863}
   - component: {fileID: 5955215780425198785}
   m_Layer: 0
   m_Name: Mob
@@ -60,6 +60,52 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7698422715352520021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6149757896793172848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b5697a0f267d4240adc37744530029c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Debug_RemainingDistance: 0
+  Debug_DistanceToHero: 0
+  TimeToDamageEnemy: []
+  CurrentTarget: {fileID: 0}
+  Hips: {fileID: 6456259610830981250}
+  CurrentTargetHC: {fileID: 0}
+  EntityHC: {fileID: 0}
+  NavAgent: {fileID: 0}
+  NavObstacle: {fileID: 0}
+  EntityType: 2
+  EntityStateString: 
+  Damage: 1
+  SightRange: 12
+  AttackRange: 1.5
+  AttackSpeed: 1
+  NavDefaultSpeed: 0
+  AnimationBoolInCombat: 0
+  InAttackAnimation: 0
+  RandomID: 0
+--- !u!114 &-6891583473431503637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6149757896793172848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d09c3cf7cf1629479220fbc9233f760, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TotalHealth: 6
+  CustomDeath: 0
+  HealthBar: {fileID: 3839754537806325577}
 --- !u!195 &6149757896793172863
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -82,50 +128,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &-6891583473431503637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6149757896793172848}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d09c3cf7cf1629479220fbc9233f760, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TotalHealth: 6
-  CustomDeath: 0
-  HealthBar: {fileID: 3839754537806325577}
---- !u!114 &7698422715352520021
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6149757896793172848}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b5697a0f267d4240adc37744530029c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TimeToDamageEnemy: []
-  CurrentTarget: {fileID: 0}
-  Hips: {fileID: 6456259610830981250}
-  CurrentTargetHC: {fileID: 0}
-  EntityHC: {fileID: 0}
-  NavAgent: {fileID: 0}
-  NavObstacle: {fileID: 0}
-  EntityType: 2
-  EntityStateString: 
-  Damage: 1
-  SightRange: 12
-  AttackRange: 1.5
-  AttackSpeed: 1
-  NavDefaultSpeed: 0
-  AnimationBoolInCombat: 0
-  InAttackAnimation: 0
-  RandomID: 0
 --- !u!208 &5955215780425198785
 NavMeshObstacle:
   m_ObjectHideFlags: 0

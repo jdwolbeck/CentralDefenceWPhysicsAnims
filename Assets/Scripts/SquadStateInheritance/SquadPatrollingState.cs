@@ -10,15 +10,17 @@ public class SquadPatrollingState : SquadState
     {
         foreach (EntityController entity in squad.SquadEntities)
         {
-            if (!entity.HasNavAgentDestination() && Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) <= squad.SquadRadius)
-                return this;
+            if (entity.CurrentTarget != null)
+                return new SquadEngagingEnemyState();
+            else if (Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.SquadRadius)
+                return new SquadGroupingState();
         }
 
-        return new SquadGroupingState();
+        return this;
     }
     public override void HandleStateLogic(SquadController squad)
     {
-        if (squad.SquadLeader != null && squad.SquadLeader.CurrentTarget == null && !squad.SquadLeader.HasNavAgentDestination() && GameHandler.Instance.Hub != null)
+        if (squad.SquadLeader != null && squad.SquadLeader.CurrentTarget == null && GameHandler.Instance.Hub != null)
         {
             // Determine positioning of our SquadLeader
             Vector3 locationRelativeToNexus = squad.SquadLeader.transform.position - GameHandler.Instance.Hub.transform.position;
@@ -43,7 +45,7 @@ public class SquadPatrollingState : SquadState
 
             foreach (EntityController entity in squad.SquadEntities)
             {
-                if (entity == squad.SquadLeader)
+                if (entity == squad.SquadLeader && !entity.HasNavAgentDestination())
                 {
                     entity.SetNavAgentDestination(nextPatrolDestination, 1f, .5f);
                 }

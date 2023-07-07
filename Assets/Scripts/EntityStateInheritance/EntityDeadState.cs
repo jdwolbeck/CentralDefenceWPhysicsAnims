@@ -20,7 +20,7 @@ public class EntityDeadState : EntityState
         navAgent.enabled = false;
         navObstacle.enabled = false;
         animator.enabled = false;
-        entityController.EntityHC.HealthBar.SetActive(false);
+        entityController.HealthController.HealthBar.SetActive(false);
         deathTime = Time.time;
 
         if (entityController.EntityType == EntityType.Mob)
@@ -41,7 +41,7 @@ public class EntityDeadState : EntityState
     }
     public override void HandleStateLogic(EntityController entityController)
     {
-        if (deathTime + 10f < Time.time)
-            UnityEngine.Object.Destroy(entityController.gameObject);
+        if (Time.time > deathTime + 10f)
+            Object.Destroy(entityController.gameObject);
     }
 }

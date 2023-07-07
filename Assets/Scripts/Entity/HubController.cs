@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class HubController : MonoBehaviour
+public class HubController : DamageableController
 {
     [SerializeField] private GameObject hoveringCrystal;
     [SerializeField] private GameObject healthBar;
