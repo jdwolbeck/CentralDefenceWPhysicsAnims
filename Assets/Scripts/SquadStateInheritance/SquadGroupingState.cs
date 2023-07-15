@@ -32,7 +32,7 @@ public class SquadGroupingState : SquadState
         if (Vector3.Distance(entity.transform.position, squad.SquadLeader.transform.position) > squad.SquadRadius)
         {
             float randomizedDistance = Random.Range(1.25f, squad.SquadRadius);
-            entity.SetNavAgentDestination(squad.SquadLeader.transform.position, randomizedDistance, 0.8f);
+            entity.AddDestinationToQueue(new NavMoveCommand(squad.SquadLeader.transform.position, randomizedDistance, 0.8f), false); //entity.SetNavAgentDestination(squad.SquadLeader.transform.position, randomizedDistance, 0.8f);
         }
     }
 }

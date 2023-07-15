@@ -72,25 +72,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52611913705fd83468c98a208b0a1ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HealthController: {fileID: 0}
   Debug_RemainingDistance: 0
   Debug_DistanceToHero: 0
   TimeToDamageEnemy: []
   CurrentTarget: {fileID: 0}
   Hips: {fileID: 6456259610830981250}
-  CurrentTargetHC: {fileID: 0}
-  EntityHC: {fileID: 0}
   NavAgent: {fileID: 0}
   NavObstacle: {fileID: 0}
+  Squad: {fileID: 0}
   EntityType: 0
   EntityStateString: 
   Damage: 3
-  SightRange: 8
+  SightRange: 998
   AttackRange: 1.5
   AttackSpeed: 1
   NavDefaultSpeed: 0
   AnimationBoolInCombat: 0
   InAttackAnimation: 0
+  CanReachNavDestination: 0
   RandomID: 0
+  shouldTurnOnNavAgent: 0
 --- !u!114 &8426747879658642880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -138,10 +140,10 @@ NavMeshObstacle:
   m_Enabled: 0
   serializedVersion: 3
   m_Shape: 0
-  m_Extents: {x: 0.5, y: 1, z: 0.5}
+  m_Extents: {x: 0.01, y: 1, z: 0.01}
   m_MoveThreshold: 0.1
   m_Carve: 0
-  m_CarveOnlyStationary: 1
+  m_CarveOnlyStationary: 0
   m_Center: {x: 0, y: 1, z: 0}
   m_TimeToStationary: 0.5
 --- !u!1 &6456259609604321710

@@ -1,7 +1,10 @@
 using Banspad;
+using Banspad.Entities;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public enum EntityType
 {
@@ -10,12 +13,26 @@ public enum EntityType
     Mob,
     EntityCount
 }
+public class NavMoveCommand
+{
+    public Vector3 Destination;
+    public float StoppingDistance;
+    public float MoveSpeedModifier;
+
+    public NavMoveCommand(Vector3 destination, float stoppingDistance=0f, float moveSpeedModifier=1f)
+    {
+        Destination = destination;
+        StoppingDistance = stoppingDistance;
+        MoveSpeedModifier = moveSpeedModifier;
+    }
+}
 public class EntityController : DamageableController
 {
     public float Debug_RemainingDistance = 0f;
     public float Debug_DistanceToHero = 0f;
 
     public List<float> TimeToDamageEnemy;
+    public List<NavMoveCommand> NextNavDestinations;
     public EntityState CurrentState;
     public DamageableController CurrentTarget;
     public GameObject Hips;
@@ -32,12 +49,16 @@ public class EntityController : DamageableController
     public float NavDefaultSpeed;
     public bool AnimationBoolInCombat;
     public bool InAttackAnimation;
+    public bool CanReachNavDestination;
     public int RandomID;
+    public int QueueCount;
 
     protected Animator animator;
     protected Rigidbody[] rigidBodies;
+    protected Vector3 lastSetNavDestination;
     protected bool animatorPresent;
     protected bool recentlyHitBySpear;
+    public bool shouldTurnOnNavAgent;
     protected bool debugEntityController;
     protected float timeSinceLastAttack;
     protected float standUpCooldown;
@@ -60,10 +81,14 @@ public class EntityController : DamageableController
 
         RandomID = Random.Range(0, 100000000);
         TimeToDamageEnemy = new List<float>();
+        NextNavDestinations = new List<NavMoveCommand>();
+        lastSetNavDestination = Vector3.zero;
 
         AnimationBoolInCombat = false;
         recentlyHitBySpear = false;
+        shouldTurnOnNavAgent = false;
         debugEntityController = false;
+        CanReachNavDestination = true;
         animatorPresent = animator != null;
         standUpCooldown = 2f;
 
@@ -74,9 +99,30 @@ public class EntityController : DamageableController
     {
         HealthController.onDeath += HandleDeath;
         HealthController.CustomDeath = true;
+        if (gameObject.name == "Mob 1")
+        {
+            SkinnedMeshRenderer unitMesh = gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
+            Material testMat = Resources.Load("Materials/TestMat") as Material;
+            unitMesh.material = testMat;
+        }
     }
     protected virtual void Update()
     {
+        QueueCount = NextNavDestinations.Count;
+        if (shouldTurnOnNavAgent && !NavObstacle.enabled)
+        {
+            NavAgent.enabled = true;
+        }
+        if (NextNavDestinations.Count > 0 && NavAgent.enabled) 
+        {
+            //if (gameObject.name == "Mob 1")
+                //Debug.Log(lastSetNavDestination + " ,vs, " + NextNavDestinations[0].Destination + ": CurrentDestination vs NextDestination");
+            
+            // We dont have a destination at the moment
+            if (lastSetNavDestination != NextNavDestinations[0].Destination)
+                SetNavAgentDestination(NextNavDestinations[0].Destination, NextNavDestinations[0].StoppingDistance, NextNavDestinations[0].MoveSpeedModifier);
+            NextNavDestinations.RemoveAt(0);
+        }
         if (recentlyHitBySpear && CurrentState is not EntityDeadState)
         { // Commence stand up sequence.
             if ((timeSinceSpear + standUpCooldown) <= Time.time)
@@ -86,7 +132,7 @@ public class EntityController : DamageableController
                 animator.enabled = true;
 
                 if (!NavObstacle.enabled)
-                    NavAgent.enabled = true;
+                    shouldTurnOnNavAgent = true;
 
                 foreach (Rigidbody rb in rigidBodies)
                     rb.isKinematic = true;
@@ -128,11 +174,11 @@ public class EntityController : DamageableController
 
         Logging.Log("Total mass of entity: " + totalMass + " total mass of Spear: " + incomingSpear.GetComponent<SpearController>().TotalMass + " final ratio: " + massRatio, debugEntityController);
     }
-    public EntityController FindNearestTarget(EntityController entity)
+    public EntityController FindNearestTarget()
     {
         List<SquadController> squadList = null;
         EntityController closestEntity = null;
-        EntityType entityType = entity.EntityType;
+        EntityType entityType = EntityType;
         float closestDistance = 0f;
 
         if (entityType == EntityType.Hero || entityType == EntityType.Mercenary)
@@ -147,15 +193,41 @@ public class EntityController : DamageableController
                 if (enemySquadEntity.CurrentState is EntityDeadState)
                     continue;
 
-                if (closestEntity == null || Vector3.Distance(entity.transform.position, enemySquadEntity.transform.position) < closestDistance)
+                if (closestEntity == null || Vector3.Distance(transform.position, enemySquadEntity.transform.position) < closestDistance)
                 {
                     closestEntity = enemySquadEntity;
-                    closestDistance = Vector3.Distance(entity.transform.position, closestEntity.transform.position);
+                    closestDistance = Vector3.Distance(transform.position, closestEntity.transform.position);
                 }
             }
         }
 
         return closestEntity;
+    }
+    public List<EntityController> FindAllTargetsInSightRange()
+    {
+        List<EntityController> targetsInSightRange = new List<EntityController>();
+        List<SquadController> squadList = null;
+        EntityType entityType = EntityType;
+
+        if (entityType == EntityType.Hero || entityType == EntityType.Mercenary)
+            squadList = GameHandler.Instance.MobSquads;
+        else
+            squadList = GameHandler.Instance.PlayerSquads;
+
+        foreach (SquadController squadController in squadList)
+        {
+            foreach (EntityController enemySquadEntity in squadController.SquadEntities)
+            {
+                if (enemySquadEntity.CurrentState is EntityDeadState)
+                    continue;
+
+
+                if (Vector3.Distance(transform.position, enemySquadEntity.transform.position) < SightRange)
+                    targetsInSightRange.Add(enemySquadEntity);
+            }
+        }
+
+        return targetsInSightRange.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).ToList();
     }
     public bool MoveToAttackTarget(DamageableController target)
     {
@@ -163,17 +235,16 @@ public class EntityController : DamageableController
 
         if (target == null)
             return false;
-
-        SetNewTarget(target);
+        if (target != CurrentTarget)
+            SetNewTarget(target);
 
         if (NavAgent.speed != NavDefaultSpeed)
             NavAgent.speed = NavDefaultSpeed;
 
         if (Vector3.Distance(transform.position, CurrentTarget.transform.position) <= AttackRange)
         {
-            if (NavAgent.enabled && NavAgent.remainingDistance > 0.1f)
-                NavAgent.SetDestination(transform.position);
-
+            /*JDW if (NavAgent.enabled && NavAgent.remainingDistance > 0.1f)
+                NavAgent.SetDestination(transform.position);*/
             if (CurrentTarget == null)
                 Logging.Log("ERROR: Current target null for some reason on " + gameObject.ToString(), true);
 
@@ -187,10 +258,13 @@ public class EntityController : DamageableController
                 if (!NavAgent.enabled)
                 {
                     NavObstacle.enabled = false;
-                    NavAgent.enabled = true;
+                    shouldTurnOnNavAgent = true; //NavAgent.enabled = true;
                 }
 
-                NavAgent.SetDestination(CurrentTarget.transform.position);
+                if (IsPathValid(CurrentTarget.transform.position))
+                    AddDestinationToQueue(new NavMoveCommand(CurrentTarget.transform.position), true); //NavAgent.SetDestination(CurrentTarget.transform.position);
+                else
+                    CircleCurrentTarget();
             }
             else // This will help our entity continue the attack animation.
             {
@@ -247,7 +321,7 @@ public class EntityController : DamageableController
 
         CurrentTarget.HealthController.onDeath -= ClearTarget;
         CurrentTarget = null;
-        AnimationBoolInCombat = false;
+        AnimationBoolInCombat = false; CanReachNavDestination = true;
     }
     public void HandleDeath()
     {
@@ -257,24 +331,28 @@ public class EntityController : DamageableController
     }
     public void SetNavAgentDestination(Vector3 destination, float stoppingDistance=0f, float moveSpeedModifier=1f)
     {
-        if (!recentlyHitBySpear && CurrentState is not EntityDeadState && NavAgent != null)
+        if (!recentlyHitBySpear && CurrentState is not EntityDeadState)
         {
-            if (!NavAgent.enabled)
-            {
-                NavObstacle.enabled = false;
-                NavAgent.enabled = true;
-            }
-
+            if (gameObject.name == "Mob 1")
+                Debug.Log("Setting NavDestination of: " + destination.ToString());
             NavAgent.SetDestination(destination);
+            lastSetNavDestination = destination;
 
             if (destination != transform.position)
-            {
                 NavAgent.stoppingDistance = stoppingDistance;
-            }
+            else
+                NavAgent.stoppingDistance = 0f;
 
-            if (NavAgent.speed == NavDefaultSpeed)
-                NavAgent.speed *= moveSpeedModifier;
+            NavAgent.speed = NavDefaultSpeed * moveSpeedModifier;
         }
+    }
+    public bool IsPathValid(Vector3 destination)
+    {
+        NavMeshPath navMeshPath = new NavMeshPath(); 
+        if (NavAgent.enabled && NavAgent.CalculatePath(destination, navMeshPath) && navMeshPath.status == NavMeshPathStatus.PathComplete)
+            return true;
+
+        return false;
     }
     public void ClearNavAgentDestination()
     {
@@ -284,12 +362,35 @@ public class EntityController : DamageableController
         if (NavAgent.speed != NavDefaultSpeed)
             NavAgent.speed = NavDefaultSpeed;
     }
-    public bool HasNavAgentDestination()
+    public bool HasNavAgentDestination(out bool isNavEnabled)
     {
-        if (NavAgent.enabled)
+        isNavEnabled = NavAgent.enabled;
+        if (isNavEnabled)
             return NavAgent.remainingDistance - NavAgent.stoppingDistance >= 0.1f;
 
         return false;
+    }
+    public void AddDestinationToQueue(NavMoveCommand moveCommand, bool isNextDestination)
+    {
+        if (isNextDestination)
+            NextNavDestinations.Insert(0, moveCommand);
+        else
+            NextNavDestinations.Add(moveCommand);
+    }
+    public void CircleCurrentTarget()
+    {
+        if (CurrentTarget == null || Vector3.Distance(CurrentTarget.transform.position, transform.position) <= 5f)
+            return;
+
+        Vector3 destination = Vector3.zero;
+
+        // Stop 1 unit before the destination
+        Vector3 vectorToMe = transform.position - CurrentTarget.transform.position;
+        vectorToMe.Normalize();
+        vectorToMe *= 2.5f;
+        destination = CurrentTarget.transform.position + vectorToMe;
+
+        AddDestinationToQueue(new NavMoveCommand(destination), true);
     }
     public bool GetEntityStatusinfo(EntityStatusInfo ourStateInfo)
     {

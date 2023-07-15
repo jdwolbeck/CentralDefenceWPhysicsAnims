@@ -26,7 +26,7 @@ public class HeroController : EntityController
     {
         if (CurrentTarget != null && Vector3.Distance(transform.position, CurrentTarget.transform.position) > AttackRange)
         {
-            EntityController closestEntity = FindNearestTarget(this);
+            EntityController closestEntity = FindNearestTarget();
 
             if (closestEntity != null && closestEntity.gameObject != CurrentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= SightRange)
                 CurrentTarget = closestEntity;

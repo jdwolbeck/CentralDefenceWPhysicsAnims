@@ -6,7 +6,8 @@ public class EntityIdleState : EntityState
 {
     public override EntityState NextEntityState(EntityController entityController)
     {
-        if (entityController.CurrentTarget != null || entityController.HasNavAgentDestination())
+        bool hasDestination = entityController.HasNavAgentDestination(out bool isNavEnabled);
+        if (entityController.CurrentTarget != null || (hasDestination && isNavEnabled))
             return new EntityMovingToLocationState();
 
         return this;

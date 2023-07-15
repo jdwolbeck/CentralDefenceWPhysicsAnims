@@ -27,7 +27,7 @@ public class MobController : EntityController
     {
         bool tempInCombat = false;
 
-        DamageableController closestEntity = FindNearestTarget(this);
+        DamageableController closestEntity = FindNearestTarget();
 
         if (closestEntity != null && closestEntity.gameObject != CurrentTarget && Vector3.Distance(transform.position, closestEntity.transform.position) <= SightRange)
         {

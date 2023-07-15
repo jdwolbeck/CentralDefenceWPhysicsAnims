@@ -45,14 +45,20 @@ public class SquadPatrollingState : SquadState
 
             foreach (EntityController entity in squad.SquadEntities)
             {
-                if (entity == squad.SquadLeader && !entity.HasNavAgentDestination())
+                if (entity.HasNavAgentDestination(out bool isNavEnabled))
+                    continue;
+
+                if (isNavEnabled)
                 {
-                    entity.SetNavAgentDestination(nextPatrolDestination, 1f, .5f);
-                }
-                else
-                {
-                    Vector3 entityPosOffset = entity.transform.position - squad.SquadLeader.transform.position;
-                    entity.SetNavAgentDestination(nextPatrolDestination + entityPosOffset, 1f, .5f);
+                    if (entity == squad.SquadLeader)
+                    {
+                        entity.AddDestinationToQueue(new NavMoveCommand(nextPatrolDestination, 1f, 0.5f), false); //entity.SetNavAgentDestination(nextPatrolDestination, 1f, .5f);
+                    }
+                    else
+                    {
+                        Vector3 entityPosOffset = entity.transform.position - squad.SquadLeader.transform.position;
+                        entity.AddDestinationToQueue(new NavMoveCommand(nextPatrolDestination + entityPosOffset, 1f, 0.5f), false); //entity.SetNavAgentDestination(nextPatrolDestination + entityPosOffset, 1f, .5f);
+                    }
                 }
             }
         }

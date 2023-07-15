@@ -12,7 +12,7 @@ public class HubController : DamageableController
     private float elapsedTime;
     private bool firstTimeHover;
 
-    void Start()
+    private void Start()
     {
         lowHoverPoint = hoveringCrystal.transform.position.y;
         highHoverPoint = lowHoverPoint + 1f;
@@ -20,7 +20,7 @@ public class HubController : DamageableController
         hoverDuration = 1.5f;
         firstTimeHover = true;
     }
-    void Update()
+    private void Update()
     {
         HoverCrystal();
     }
