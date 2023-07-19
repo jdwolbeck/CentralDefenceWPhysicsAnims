@@ -7,42 +7,32 @@ using UnityEngine.AI;
 
 public class EntityState
 {
+    private float timeToUpdateEntityState;
     public virtual EntityState NextEntityState(EntityController entityController)
     {
         return new EntityInitializingState();
     }
     public virtual void HandleStateLogic(EntityController entityController)
     {
-        HandleEnemyProximityChecks(entityController);
-        HandleDefendingSquad(entityController);
+        if (Time.time > timeToUpdateEntityState)
+        {
+            // Do some checks to set our CurrentTarget if necessary.
+            HandleEnemyProximityChecks(entityController);
+            HandleDefendingSquad(entityController);
+
+            timeToUpdateEntityState = Time.time + 0.5f;
+        }
     }
     private void HandleEnemyProximityChecks(EntityController entityController)
     {
-        EntityController nextTarget = FindNextTarget(entityController);
+        EntityController nextTarget = FindNextTarget(entityController, out bool validTargetFound);
+        entityController.CanReachTarget = validTargetFound;
 
         if (CheckIfNewTargetRequired(entityController, nextTarget))
             entityController.SetNewTarget(nextTarget);
 
-        if (entityController.CurrentTarget != null)
-        {
-            if (entityController.CurrentTarget.GetComponent<EntityController>()?.CurrentState is EntityDeadState)
-                entityController.ClearTarget();
-
-            entityController.AnimationBoolInCombat = entityController.MoveToAttackTarget(entityController.CurrentTarget);
-        }
-        else
-        {
-            entityController.AnimationBoolInCombat = false;
-
-            if (!entityController.NavAgent.enabled)
-            {
-                entityController.NavObstacle.enabled = false;
-                entityController.shouldTurnOnNavAgent = true; //entityController.NavAgent.enabled = true;
-            }
-
-            if (entityController.EntityType == EntityType.Mob && GameHandler.Instance.Hub != null)
-                entityController.SetNewTarget(GameHandler.Instance.Hub.GetComponent<DamageableController>());
-        }
+        if (entityController.CurrentTarget == null && entityController.EntityType == EntityType.Mob && GameHandler.Instance.Hub != null)
+            entityController.SetNewTarget(GameHandler.Instance.Hub.GetComponent<DamageableController>());
     }
     private void HandleDefendingSquad(EntityController entityController)
     {
@@ -87,10 +77,11 @@ public class EntityState
 
         return true;
     }
-    private EntityController FindNextTarget(EntityController entityController)
+    private EntityController FindNextTarget(EntityController entityController, out bool validTargetFound)
     {
         List<EntityController> entitiesInRange = entityController.FindAllTargetsInSightRange();
         EntityController nextTarget = entityController.CurrentTarget as EntityController;
+        bool foundValidTarget = false;
 
         if (entityController.CurrentTarget == null && entitiesInRange.Count > 0)
         {
@@ -98,8 +89,6 @@ public class EntityState
         }
         else if (entityController.CurrentTarget != null)
         {
-            bool foundValidTarget = false;
-
             foreach (EntityController e in entitiesInRange)
             {
                 if (entityController.IsPathValid(e.transform.position))
@@ -116,6 +105,7 @@ public class EntityState
             }
         }
 
+        validTargetFound = foundValidTarget;
         return nextTarget;
     }
 }

@@ -42,12 +42,6 @@ public class HeroController : EntityController
         {
             AnimationBoolInCombat = false;
 
-            if (!NavAgent.enabled)
-            {
-                NavObstacle.enabled = false;
-                NavAgent.enabled = true;
-            }
-
             LookForTarget();
         }
     }

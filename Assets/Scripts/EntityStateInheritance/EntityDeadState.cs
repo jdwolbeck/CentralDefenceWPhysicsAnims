@@ -1,6 +1,7 @@
 using Banspad;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,17 +10,15 @@ public class EntityDeadState : EntityState
     private float deathTime;
     public EntityDeadState(EntityController entityController)
     {
-        Rigidbody[] rigidbodies = entityController.gameObject.GetComponentsInChildren<Rigidbody>();
-        Animator animator = entityController.gameObject.GetComponent<Animator>();
-        NavMeshAgent navAgent = entityController.gameObject.GetComponent<NavMeshAgent>();
-        NavMeshObstacle navObstacle = entityController.gameObject.GetComponent<NavMeshObstacle>();
+        Rigidbody[] rigidbodies = entityController.GetComponentsInChildren<Rigidbody>();
 
         foreach (Rigidbody rb in rigidbodies)
             rb.isKinematic = false;
 
-        navAgent.enabled = false;
-        navObstacle.enabled = false;
-        animator.enabled = false;
+
+        entityController.GetComponent<Animator>().enabled = false;
+        entityController.NavAgent.enabled = false;
+        entityController.NavObstacle.enabled = false;
         entityController.HealthController.HealthBar.SetActive(false);
         deathTime = Time.time;
 

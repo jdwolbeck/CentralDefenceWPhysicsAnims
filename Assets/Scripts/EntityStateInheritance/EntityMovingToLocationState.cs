@@ -8,9 +8,9 @@ public class EntityMovingToLocationState : EntityState
     public override EntityState NextEntityState(EntityController entityController)
     {
         bool hasDestination = entityController.HasNavAgentDestination(out bool isNavEnabled);
-        if (entityController.CurrentTarget != null && Vector3.Distance(entityController.CurrentTarget.transform.position, entityController.transform.position) <= entityController.AttackRange)
+        if (entityController.CurrentTarget != null)
             return new EntityAttackingState();
-        else if (entityController.CurrentTarget == null && (!hasDestination && isNavEnabled))
+        else if (!hasDestination || !isNavEnabled)
             return new EntityIdleState();
 
         return this;

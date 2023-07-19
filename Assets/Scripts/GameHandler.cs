@@ -1,5 +1,6 @@
 using Banspad;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 
 public class GameHandler : MonoBehaviour
@@ -10,6 +11,7 @@ public class GameHandler : MonoBehaviour
     public GameObject Hub;
 
     private GameObject spearPrefab;
+    private float timeToUpdateMesh;
 
     private void Awake()
     {

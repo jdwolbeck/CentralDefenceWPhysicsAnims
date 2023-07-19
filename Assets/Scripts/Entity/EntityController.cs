@@ -1,10 +1,14 @@
 using Banspad;
 using Banspad.Entities;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.AI.Navigation;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using static UnityEngine.EventSystems.EventTrigger;
+using static UnityEngine.GraphicsBuffer;
 
 public enum EntityType
 {
@@ -50,6 +54,7 @@ public class EntityController : DamageableController
     public bool AnimationBoolInCombat;
     public bool InAttackAnimation;
     public bool CanReachNavDestination;
+    public bool CanReachTarget;
     public int RandomID;
     public int QueueCount;
 
@@ -58,7 +63,6 @@ public class EntityController : DamageableController
     protected Vector3 lastSetNavDestination;
     protected bool animatorPresent;
     protected bool recentlyHitBySpear;
-    public bool shouldTurnOnNavAgent;
     protected bool debugEntityController;
     protected float timeSinceLastAttack;
     protected float standUpCooldown;
@@ -71,12 +75,12 @@ public class EntityController : DamageableController
         CurrentState = new EntityState();
         animator = GetComponent<Animator>();
         NavAgent = GetComponent<NavMeshAgent>();
+        NavObstacle = GetComponent<NavMeshObstacle>();
         NavDefaultSpeed = NavAgent.speed;
         /*if (EntityType == EntityType.Hero)
             NavAgent.avoidancePriority = Random.Range(5, 25);
         else
             NavAgent.avoidancePriority = Random.Range(30, 50);*/
-        NavObstacle = GetComponent<NavMeshObstacle>();
         rigidBodies = GetComponentsInChildren<Rigidbody>();
 
         RandomID = Random.Range(0, 100000000);
@@ -86,7 +90,6 @@ public class EntityController : DamageableController
 
         AnimationBoolInCombat = false;
         recentlyHitBySpear = false;
-        shouldTurnOnNavAgent = false;
         debugEntityController = false;
         CanReachNavDestination = true;
         animatorPresent = animator != null;
@@ -99,25 +102,20 @@ public class EntityController : DamageableController
     {
         HealthController.onDeath += HandleDeath;
         HealthController.CustomDeath = true;
+
         if (gameObject.name == "Mob 1")
         {
             SkinnedMeshRenderer unitMesh = gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
             Material testMat = Resources.Load("Materials/TestMat") as Material;
             unitMesh.material = testMat;
+            transform.position = new Vector3(35, 0, 10);
         }
     }
     protected virtual void Update()
     {
         QueueCount = NextNavDestinations.Count;
-        if (shouldTurnOnNavAgent && !NavObstacle.enabled)
-        {
-            NavAgent.enabled = true;
-        }
         if (NextNavDestinations.Count > 0 && NavAgent.enabled) 
-        {
-            //if (gameObject.name == "Mob 1")
-                //Debug.Log(lastSetNavDestination + " ,vs, " + NextNavDestinations[0].Destination + ": CurrentDestination vs NextDestination");
-            
+        {            
             // We dont have a destination at the moment
             if (lastSetNavDestination != NextNavDestinations[0].Destination)
                 SetNavAgentDestination(NextNavDestinations[0].Destination, NextNavDestinations[0].StoppingDistance, NextNavDestinations[0].MoveSpeedModifier);
@@ -132,7 +130,7 @@ public class EntityController : DamageableController
                 animator.enabled = true;
 
                 if (!NavObstacle.enabled)
-                    shouldTurnOnNavAgent = true;
+                    NavAgent.enabled = true;
 
                 foreach (Rigidbody rb in rigidBodies)
                     rb.isKinematic = true;
@@ -243,8 +241,14 @@ public class EntityController : DamageableController
 
         if (Vector3.Distance(transform.position, CurrentTarget.transform.position) <= AttackRange)
         {
-            /*JDW if (NavAgent.enabled && NavAgent.remainingDistance > 0.1f)
-                NavAgent.SetDestination(transform.position);*/
+            if (NavAgent.enabled)
+            {
+                NavAgent.SetDestination(transform.position);
+                transform.rotation = Quaternion.LookRotation(target.transform.position - transform.position);
+                NavAgent.enabled = false;
+                NavObstacle.enabled = true;
+            }
+
             if (CurrentTarget == null)
                 Logging.Log("ERROR: Current target null for some reason on " + gameObject.ToString(), true);
 
@@ -255,16 +259,10 @@ public class EntityController : DamageableController
         {
             if (!InAttackAnimation)
             {
-                if (!NavAgent.enabled)
-                {
-                    NavObstacle.enabled = false;
-                    shouldTurnOnNavAgent = true; //NavAgent.enabled = true;
-                }
-
-                if (IsPathValid(CurrentTarget.transform.position))
-                    AddDestinationToQueue(new NavMoveCommand(CurrentTarget.transform.position), true); //NavAgent.SetDestination(CurrentTarget.transform.position);
-                else
-                    CircleCurrentTarget();
+                //if (IsPathValid(CurrentTarget.transform.position))
+                AddDestinationToQueue(new NavMoveCommand(CurrentTarget.transform.position), true); //NavAgent.SetDestination(CurrentTarget.transform.position);
+                //else
+                    //CircleCurrentTarget();
             }
             else // This will help our entity continue the attack animation.
             {
@@ -284,17 +282,8 @@ public class EntityController : DamageableController
             return;
         }
 
-        Quaternion lookOnLook = Quaternion.LookRotation(target.transform.position - transform.position);
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookOnLook, Time.deltaTime * 3);
-
         if (Time.time > timeSinceLastAttack + attackCooldown)
         {
-            if (NavAgent.enabled)
-            {
-                NavAgent.enabled = false;
-                NavObstacle.enabled = true;
-            }
-
             InAttackAnimation = true;
             TimeToDamageEnemy.Add(Time.time + attackCooldown - 0.2f);
             timeSinceLastAttack = Time.time;
@@ -319,9 +308,25 @@ public class EntityController : DamageableController
         if (CurrentTarget == null)
             return;
 
+        if (NavObstacle != null)
+            NavObstacle.enabled = false;
+
+        if (NavAgent != null)
+        {
+            StartCoroutine(WaitOneFrame());
+            IEnumerator WaitOneFrame()
+            {
+                yield return new WaitForEndOfFrame();
+                yield return new WaitForEndOfFrame();
+                if (!NavObstacle.enabled)
+                    NavAgent.enabled = true;
+            }
+        }
+
         CurrentTarget.HealthController.onDeath -= ClearTarget;
         CurrentTarget = null;
-        AnimationBoolInCombat = false; CanReachNavDestination = true;
+        AnimationBoolInCombat = false; 
+        CanReachNavDestination = true;
     }
     public void HandleDeath()
     {
@@ -333,18 +338,15 @@ public class EntityController : DamageableController
     {
         if (!recentlyHitBySpear && CurrentState is not EntityDeadState)
         {
-            if (gameObject.name == "Mob 1")
-                Debug.Log("Setting NavDestination of: " + destination.ToString());
             NavAgent.SetDestination(destination);
             lastSetNavDestination = destination;
+            NavAgent.speed = NavDefaultSpeed * moveSpeedModifier;
 
             if (destination != transform.position)
                 NavAgent.stoppingDistance = stoppingDistance;
             else
                 NavAgent.stoppingDistance = 0f;
-
-            NavAgent.speed = NavDefaultSpeed * moveSpeedModifier;
-        }
+        }            
     }
     public bool IsPathValid(Vector3 destination)
     {
@@ -377,20 +379,51 @@ public class EntityController : DamageableController
         else
             NextNavDestinations.Add(moveCommand);
     }
-    public void CircleCurrentTarget()
+    public void CircleCurrentTarget(bool rotationDirection)
     {
-        if (CurrentTarget == null || Vector3.Distance(CurrentTarget.transform.position, transform.position) <= 5f)
+        // Add randomized radius to each point
+        if (CurrentTarget == null)
+        {
+            Debug.Log(ToString() + ": circling target but target is null??");
             return;
+        }
+        float angleModifier = Random.Range(30f, 90f);
+        Vector3 nextMoveDestination;
+        //float circleRadius = Random.Range(AttackRange + 2f, AttackRange + 2f);
+        float circleRadius = Random.Range(AttackRange + 1.5f, AttackRange + 2f);
 
-        Vector3 destination = Vector3.zero;
+        //Quaternion temp = Quaternion.LookRotation(CurrentTarget.transform.position - transform.position);
+        //if (gameObject.name == "Mob 1") Debug.Log(gameObject.ToString() + ": euler = " + temp.eulerAngles);
+        float currentAngleToTarget = Vector3.SignedAngle(Vector3.forward, transform.position - CurrentTarget.transform.position, Vector3.up);
+        float newAngle = currentAngleToTarget + angleModifier;
+        if (!rotationDirection)
+            newAngle -= 2 * angleModifier;
+        if (newAngle > 180)
+        {
+            newAngle -= 2 * (newAngle - 180); // Subtract by how much we went over 180, twice. Once to fix our mistake and a second time to actually calculate the right angle
+            newAngle *= -1;
+        }
+        else if (newAngle < -180)
+        {
+            newAngle -= 2 * (newAngle + 180); // Subtract by how much we went over 180, twice. Once to fix our mistake and a second time to actually calculate the right angle
+            newAngle *= -1;
+        }
+        float unsignedAngle = newAngle;
+        if (unsignedAngle < 0)
+            unsignedAngle += 360f;
 
-        // Stop 1 unit before the destination
-        Vector3 vectorToMe = transform.position - CurrentTarget.transform.position;
-        vectorToMe.Normalize();
-        vectorToMe *= 2.5f;
-        destination = CurrentTarget.transform.position + vectorToMe;
+        //if (gameObject.name == "Mob 1") Debug.Log(gameObject.ToString() + ": euler = " + currentAngleToTarget + " newAngle = " + newAngle + " newAngleUnsigned = " + unsignedAngle);
 
-        AddDestinationToQueue(new NavMoveCommand(destination), true);
+        float x = circleRadius * Mathf.Sin(Mathf.PI * 2 * unsignedAngle / 360);
+        float y = circleRadius * Mathf.Cos(Mathf.PI * 2 * unsignedAngle / 360);
+
+        nextMoveDestination = new Vector3(x, 0, y) + CurrentTarget.transform.position;
+
+        if (NavAgent.enabled)
+        {
+            NavAgent.destination = nextMoveDestination;
+            NavAgent.SetDestination(nextMoveDestination);
+        }
     }
     public bool GetEntityStatusinfo(EntityStatusInfo ourStateInfo)
     {
